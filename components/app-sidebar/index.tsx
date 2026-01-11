@@ -4,7 +4,6 @@ import * as React from "react";
 import { Command } from "lucide-react";
 
 // Components
-import { NavUser } from "@/components/app-sidebar/nav-user";
 import {
   Sidebar,
   SidebarContent,
@@ -14,13 +13,33 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { Skeleton } from "@/components/ui/skeleton";
+import { NavUser } from "@/components/app-sidebar/nav-user";
 
 import { NavItems } from "./nav-items";
+
+// Hooks
+import { useUserProfileStore } from "@/hooks/use-user-profile-store";
 
 // Contants
 import { APP_SIDEBAR_ITEMS } from "@/constants/app-sidebar-items";
 
+// Utils
+import { getSupabaseClient } from "@/lib/supabase/client";
+import { useRouter } from "nextjs-toploader/app";
+
 export const AppSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
+  const router = useRouter();
+  const supabase = getSupabaseClient();
+
+  const { data, loading, actions } = useUserProfileStore((state) => state);
+
+  const handleSignOut = async () => {
+    actions.clear();
+    await supabase.auth.signOut();
+    router.push("/");
+  };
+
   return (
     <Sidebar className="top-(--header-height) h-[calc(100svh-var(--header-height))]!" {...props}>
       <SidebarHeader>
@@ -44,13 +63,11 @@ export const AppSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) =
         <NavItems {...APP_SIDEBAR_ITEMS.platform} />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser
-          user={{
-            name: "Jane Cooper",
-            email: "",
-            image: "",
-          }}
-        />
+        {loading ? (
+          <Skeleton className="h-10 w-full rounded-lg" />
+        ) : (
+          <NavUser user={data} handleSignOut={handleSignOut} />
+        )}
       </SidebarFooter>
     </Sidebar>
   );
