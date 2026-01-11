@@ -41,11 +41,14 @@ export const PageClient = () => {
             >
               Features
             </Link>
-            <Link href="/docs" className="text-muted-foreground hover:text-foreground transition">
-              Docs
-            </Link>
             <Link href="/login" className="text-muted-foreground hover:text-foreground transition">
               Login
+            </Link>
+            <Link
+              href="/register"
+              className="text-muted-foreground hover:text-foreground transition"
+            >
+              <Button>Sign up</Button>
             </Link>
           </div>
 
@@ -60,27 +63,32 @@ export const PageClient = () => {
 
         {isMenuOpen && (
           <div className="sm:hidden border-t border-border bg-background">
-            <div className="px-4 py-4 space-y-3 flex flex-col">
+            <div className="px-4 py-4 flex flex-col">
               <Link
                 href="#features"
                 onClick={closeMenu}
                 className="text-sm text-muted-foreground hover:text-foreground transition block py-2"
               >
-                Features
-              </Link>
-              <Link
-                href="/docs"
-                onClick={closeMenu}
-                className="text-sm text-muted-foreground hover:text-foreground transition block py-2"
-              >
-                Docs
+                <Button onClick={closeMenu} variant="link" size="sm">
+                  Features
+                </Button>
               </Link>
               <Link
                 href="/login"
                 onClick={closeMenu}
                 className="text-sm text-muted-foreground hover:text-foreground transition block py-2"
               >
-                Login
+                <Button onClick={closeMenu} variant="link" size="sm">
+                  Login
+                </Button>
+              </Link>
+              <Link
+                href="/register"
+                className="text-sm text-muted-foreground hover:text-foreground transition block py-2"
+              >
+                <Button onClick={closeMenu} size="sm">
+                  Sign up
+                </Button>
               </Link>
             </div>
           </div>
@@ -89,36 +97,36 @@ export const PageClient = () => {
 
       {/* Hero Section */}
       <section className="pt-16 pb-16 sm:pt-32 sm:pb-24 md:pt-48 md:pb-32">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center sm:text-left">
+          <p className="text-xs text-muted-foreground uppercase tracking-wide">
+            Open source • Actively maintained
+          </p>
+
           <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-balance mb-4 sm:mb-6 leading-tight">
             Ship full-stack apps in days, not months
           </h1>
 
           <p className="text-base sm:text-lg md:text-xl text-muted-foreground text-balance mb-8 sm:mb-12 max-w-2xl leading-relaxed">
-            A production-ready Next.js template with Supabase, Stripe, Docker, and everything you
-            need to build and deploy modern applications.
+            A production-ready Next.js template with everything you need to build and deploy modern
+            web apps.
           </p>
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-12 sm:mb-16">
+            <Link href="/login">
+              <Button className="w-full">Get Started</Button>
+            </Link>
             <Link
               href="https://github.com/wannacry081/nextjs-supabase-template"
               target="_blank"
               rel="noreferrer"
             >
-              <Button>
-                Get Started
+              <Button className="w-full" variant="ghost">
+                Visit GitHub Repository
                 <ArrowRight className="w-4 h-4" />
               </Button>
             </Link>
-            <Link href="/docs">
-              <Button variant="secondary">Read Docs</Button>
-            </Link>
           </div>
-
-          <p className="text-xs text-muted-foreground uppercase tracking-wide">
-            Open source • Actively maintained
-          </p>
         </div>
       </section>
 
@@ -182,9 +190,6 @@ export const PageClient = () => {
                 className="hover:text-foreground transition"
               >
                 GitHub
-              </Link>
-              <Link href="/docs" className="hover:text-foreground transition">
-                Docs
               </Link>
             </div>
           </div>
