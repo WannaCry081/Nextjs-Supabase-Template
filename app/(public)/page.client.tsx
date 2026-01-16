@@ -14,7 +14,7 @@ const features = [
   "ESLint, Prettier, and Husky for code quality",
   "VitePress documentation site included and customizable",
   "Docker containerized for seamless deployment",
-  "Nodemailer email management system",
+  "Resend email management system",
   "GitHub Actions for CI/CD workflows",
 ];
 
@@ -182,7 +182,7 @@ export const PageClient = () => {
       <footer className="border-t border-border py-8 sm:py-12">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="flex flex-col sm:flex-row sm:justify-between gap-4 sm:gap-6 text-xs text-muted-foreground">
-            <p>© 2026 TemplateKit</p>
+            <p>© 2026 TemplateKit By WannaCry081</p>
             <div className="flex items-center gap-4 sm:gap-6">
               <Link
                 href="https://github.com/wannacry081"
