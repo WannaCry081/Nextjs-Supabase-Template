@@ -11,12 +11,11 @@ const features = [
   "Supabase authentication and CRUD operations with Drizzle ORM",
   "Stripe payments integration for subscriptions and transactions",
   "Pre-built authentication UI with modern design patterns",
-  "Developer tools: GitHub Actions, ESLint, Prettier, Husky",
+  "ESLint, Prettier, and Husky for code quality",
   "VitePress documentation site included and customizable",
   "Docker containerized for seamless deployment",
-  "Open source and MIT licensed",
   "Nodemailer email management system",
-  "Vitest and Playwright testing suite",
+  "GitHub Actions for CI/CD workflows",
 ];
 
 export const PageClient = () => {
