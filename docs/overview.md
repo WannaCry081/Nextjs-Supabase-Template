@@ -93,6 +93,150 @@ const PROTECTED_ROUTES: string[] = ["/dashboard/*", "/settings/*", "/admin/*"];
 
 Add any route pattern to `PROTECTED_ROUTES` to require authentication. The middleware automatically intercepts requests and redirects unauthenticated users to the login page.
 
+## Using State Management
+
+This template uses **Zustand** combined with **React Context** for optimal state management. This pattern provides the simplicity of Zustand with the dependency injection benefits of Context. Learn more about this approach in [this detailed guide](https://tkdodo.eu/blog/zustand-and-react-context).
+
+### Zustand + React Context Pattern
+
+**Create a Store Provider:**
+
+```typescript
+// components/providers/user-profile-provider.tsx
+"use client";
+
+import { createStore, type StoreApi } from "zustand";
+import { createContext, useState, PropsWithChildren, useEffect } from "react";
+import type { SelectProfile } from "@/types/drizzle.types";
+
+type UserProfileState = {
+  loading: boolean;
+  error: string | null;
+  data: SelectProfile | null;
+  actions: {
+    hydrate: () => Promise<void>;
+    clear: () => void;
+  };
+};
+
+export type UserProfileStore = StoreApi<UserProfileState>;
+export const UserProfileContext = createContext<UserProfileStore | null>(null);
+
+export const UserProfileProvider = ({ children }: PropsWithChildren) => {
+  const [store] = useState(() =>
+    createStore<UserProfileState>((set) => ({
+      loading: true,
+      error: null,
+      data: null,
+      actions: {
+        hydrate: async () => {
+          set({ loading: true, error: null });
+          try {
+            const response = await fetch("/api/users/me");
+
+            if (response.status === 401) {
+              set({ data: null, loading: false });
+              return;
+            }
+
+            if (!response.ok) {
+              throw new Error(await response.text());
+            }
+
+            const data = await response.json();
+            set({ data: data.data ?? null, loading: false });
+          } catch (error: unknown) {
+            set({
+              error: error instanceof Error ? error.message : "Failed to load profile",
+              loading: false,
+            });
+          }
+        },
+        clear: () => {
+          set({ data: null, loading: false, error: null });
+        },
+      },
+    }))
+  );
+
+  useEffect(() => {
+    store.getState().actions.hydrate();
+  }, [store]);
+
+  return (
+    <UserProfileContext.Provider value={store}>
+      {children}
+    </UserProfileContext.Provider>
+  );
+};
+```
+
+**Create a Custom Hook:**
+
+```typescript
+// hooks/use-user-profile-store.ts
+import { useContext } from "react";
+import { useStore } from "zustand";
+import {
+  UserProfileContext,
+  type UserProfileStore,
+} from "@/components/providers/user-profile-provider";
+
+export const useUserProfileStore = <T>(
+  selector: (state: ReturnType<UserProfileStore["getState"]>) => T
+) => {
+  const store = useContext(UserProfileContext);
+
+  if (!store) {
+    throw new Error("`useUserProfileStore` must be used within a UserProfileProvider");
+  }
+
+  return useStore(store, selector);
+};
+```
+
+**Usage in Components:**
+
+```typescript
+"use client";
+
+import { useUserProfileStore } from "@/hooks/use-user-profile-store";
+
+export function UserProfile() {
+  const { data, loading, error } = useUserProfileStore(
+    (state) => ({
+      data: state.data,
+      loading: state.loading,
+      error: state.error,
+    })
+  );
+
+  const { clear } = useUserProfileStore((state) => state.actions);
+
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
+
+  return (
+    <div>
+      <h1>{data?.name}</h1>
+      <button onClick={clear}>Clear Profile</button>
+    </div>
+  );
+}
+```
+
+### Why This Pattern?
+
+- **Zustand Benefits**: Minimal boilerplate, zero dependencies, excellent performance with selectors
+- **React Context Benefits**: Scoped state, easy dependency injection, type-safe
+- **Combined**: Each provider instance has its own store, enabling fine-grained control and testing
+
+### Setting Up New Providers
+
+1. Create a store type and provider component
+2. Create a custom hook for accessing the store
+3. Wrap your app with the provider at the appropriate level
+
 ## Using Drizzle ORM
 
 **Drizzle ORM** provides a type-safe, SQL-first ORM for database operations. It includes relation support, migrations, and a studio for database management.
