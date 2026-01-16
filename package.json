@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "start:all": "concurrently \"pnpm dev\" \"pnpm docs:dev\" \"db:studio\"",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
@@ -13,7 +14,7 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
-    "docs:dev": "vitepress dev docs",
+    "docs:dev": "vitepress dev docs --watch",
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs"
   },
@@ -62,6 +63,7 @@
     "@typescript-eslint/eslint-plugin": "8.51.0",
     "@typescript-eslint/parser": "8.51.0",
     "babel-plugin-react-compiler": "1.0.0",
+    "concurrently": "^9.2.1",
     "drizzle-kit": "0.31.8",
     "eslint": "9.39.2",
     "eslint-config-next": "16.1.1",
