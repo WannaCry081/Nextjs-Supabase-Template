@@ -12,7 +12,7 @@ hero:
   actions:
     - theme: brand
       text: Getting Started
-      link: /getting-started
+      link: /overview
     - theme: alt
       text: Visit Page
       link: http://localhost:3000/
