@@ -6,6 +6,7 @@ import { ArrowRight, Menu, X } from "lucide-react";
 
 // Components
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/use-auth";
 
 const features = [
   "Supabase authentication and CRUD operations with Drizzle ORM",
@@ -19,6 +20,7 @@ const features = [
 ];
 
 export const PageClient = () => {
+  const { user } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
@@ -40,15 +42,30 @@ export const PageClient = () => {
             >
               Features
             </Link>
-            <Link href="/login" className="text-muted-foreground hover:text-foreground transition">
-              Login
-            </Link>
-            <Link
-              href="/register"
-              className="text-muted-foreground hover:text-foreground transition"
-            >
-              <Button>Sign up</Button>
-            </Link>
+
+            {user ? (
+              <Link
+                href="/dashboard"
+                className="text-muted-foreground hover:text-foreground transition"
+              >
+                <Button>Go to Dashboard</Button>
+              </Link>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  className="text-muted-foreground hover:text-foreground transition"
+                >
+                  Login
+                </Link>
+                <Link
+                  href="/register"
+                  className="text-muted-foreground hover:text-foreground transition"
+                >
+                  <Button>Sign up</Button>
+                </Link>
+              </>
+            )}
           </div>
 
           <button
