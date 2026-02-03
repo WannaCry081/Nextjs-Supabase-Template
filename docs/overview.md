@@ -84,10 +84,10 @@ The sidebar automatically renders all items with icons and handles navigation. T
 
 ### Proxy & Protected Routes
 
-Protect routes using the middleware proxy in `proxy.ts`. All specified routes require authentication:
+Protect routes using the middleware in `middleware.ts`. All specified routes require authentication:
 
 ```typescript
-// proxy.ts
+// middleware.ts
 const PROTECTED_ROUTES: string[] = ["/dashboard/*", "/settings/*", "/admin/*"];
 ```
 
@@ -236,6 +236,61 @@ export function UserProfile() {
 1. Create a store type and provider component
 2. Create a custom hook for accessing the store
 3. Wrap your app with the provider at the appropriate level
+
+## Using SEO helper function
+
+I've created a helper function to make building SEO-friendly pages effortless.
+
+### Using it in the root layout
+
+Set your global defaults once in the App Router layout. All pages will inherit this metadata.
+
+```typescript
+// app/layout.tsx
+import type { Metadata } from "next";
+import { buildMetadata } from "@/lib/seo";
+
+export const metadata: Metadata = buildMetadata();
+```
+
+### Using it in Per-page metadata
+
+Static page:
+
+```typescript
+// app/pricing/page.tsx
+import type { Metadata } from "next";
+import { buildMetadata } from "@/lib/seo";
+
+export const metadata: Metadata = buildMetadata({
+  title: "Pricing",
+  description: "Simple, transparent pricing.",
+  path: "/pricing",
+});
+```
+
+Dynamic route (when you need params or data):
+
+```typescript
+// app/blog/[slug]/page.tsx
+import type { Metadata } from "next";
+import { buildMetadata } from "@/lib/seo";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+
+  return buildMetadata({
+    title: `Post: ${slug}`,
+    description: `Read ${slug}`,
+    path: `/blog/${slug}`,
+    image: "/og.png",
+  });
+}
+```
 
 ## Using Drizzle ORM
 
