@@ -29,7 +29,7 @@ export const useAuth = () => {
     });
 
     return () => subscription?.unsubscribe();
-  }, []);
+  }, [supabase]);
 
   return {
     session,
