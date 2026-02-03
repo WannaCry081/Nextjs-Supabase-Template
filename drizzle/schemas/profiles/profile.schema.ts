@@ -1,4 +1,6 @@
 import { pgTable, varchar } from "drizzle-orm/pg-core";
+
+// Base columns
 import { baseColumns } from "../base";
 
 export const profiles = pgTable("profiles", {

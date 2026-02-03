@@ -1,6 +1,7 @@
 import { useContext } from "react";
 import { useStore } from "zustand";
 
+// Components
 import {
   UserProfileContext,
   type UserProfileStore,
