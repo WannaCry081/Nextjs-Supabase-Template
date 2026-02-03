@@ -16,7 +16,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { NavUser } from "@/components/app-sidebar/nav-user";
 
-import { NavItems } from "./nav-items";
+import { NavPrimary } from "./nav-primary";
 
 // Hooks
 import { useUserProfileStore } from "@/hooks/use-user-profile-store";
@@ -27,6 +27,7 @@ import { APP_SIDEBAR_ITEMS } from "@/constants/app-sidebar-items.constant";
 // Utils
 import { getSupabaseClient } from "@/lib/supabase/client";
 import { useRouter } from "nextjs-toploader/app";
+import { NavSecondary } from "./nav-secondary";
 
 export const AppSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
   const router = useRouter();
@@ -60,7 +61,8 @@ export const AppSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) =
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavItems {...APP_SIDEBAR_ITEMS.platform} />
+        <NavPrimary {...APP_SIDEBAR_ITEMS.platform} />
+        <NavSecondary {...APP_SIDEBAR_ITEMS.secondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
         {loading ? (
