@@ -11,18 +11,16 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 
-export const NavItems = ({
-  title,
-  items,
-  ...props
-}: {
+interface NavPrimaryProps extends React.ComponentPropsWithoutRef<typeof SidebarGroup> {
   title: string;
   items: {
     name: string;
     url: string;
     icon: LucideIcon;
   }[];
-} & React.ComponentPropsWithoutRef<typeof SidebarGroup>) => {
+}
+
+export const NavPrimary = ({ title, items, ...props }: NavPrimaryProps) => {
   return (
     <SidebarGroup {...props}>
       <SidebarGroupLabel>{title}</SidebarGroupLabel>
