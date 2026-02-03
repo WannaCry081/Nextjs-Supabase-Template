@@ -1,4 +1,4 @@
-import { Frame, Map, PieChart } from "lucide-react";
+import { Frame, Settings, Map, PieChart, Send } from "lucide-react";
 
 export const APP_SIDEBAR_ITEMS = {
   platform: {
@@ -18,6 +18,22 @@ export const APP_SIDEBAR_ITEMS = {
         name: "Travel",
         url: "#",
         icon: Map,
+      },
+    ],
+  },
+
+  secondary: {
+    title: "Secondary",
+    items: [
+      {
+        name: "Settings",
+        url: "#",
+        icon: Settings,
+      },
+      {
+        name: "Feedback",
+        url: "#",
+        icon: Send,
       },
     ],
   },
