@@ -8,6 +8,7 @@ import { ReactQueryProvider } from "@/components/providers/react-query-provider"
 
 // Styles
 import "./styles/globals.css";
+import { buildMetadata } from "@/lib/seo";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -19,10 +20,7 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "Next.js Supabase Template",
-  description: "A production-ready Next.js + Supabase starter template.",
-};
+export const metadata: Metadata = buildMetadata({});
 
 export default function RootLayout({
   children,
