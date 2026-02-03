@@ -22,7 +22,7 @@ import { NavItems } from "./nav-items";
 import { useUserProfileStore } from "@/hooks/use-user-profile-store";
 
 // Contants
-import { APP_SIDEBAR_ITEMS } from "@/constants/app-sidebar-items";
+import { APP_SIDEBAR_ITEMS } from "@/constants/app-sidebar-items.constant";
 
 // Utils
 import { getSupabaseClient } from "@/lib/supabase/client";
