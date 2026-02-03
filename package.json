@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "start:all": "concurrently \"pnpm dev\" \"pnpm docs:dev\" \"db:studio\"",
+    "start:all": "concurrently \"pnpm dev\" \"pnpm docs:dev\" \"pnpm db:studio\"",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",

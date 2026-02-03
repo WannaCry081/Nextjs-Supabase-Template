@@ -55,6 +55,7 @@ const eslintConfig = defineConfig([
     ".next/**",
     "out/**",
     "build/**",
+    "docs/.vitepress/**",
     "next-env.d.ts",
     "node_modules/**",
     "components/ui/**",

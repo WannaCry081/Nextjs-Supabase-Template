@@ -11,7 +11,7 @@ const features = [
   "Supabase authentication and CRUD operations with Drizzle ORM",
   "Stripe payments integration for subscriptions and transactions",
   "Pre-built authentication UI with modern design patterns",
-  "ESLint, Prettier, and Husky for code quality",
+  "ESLint and Prettier for code quality",
   "VitePress documentation site included and customizable",
   "Docker containerized for seamless deployment",
   "Resend email management system",

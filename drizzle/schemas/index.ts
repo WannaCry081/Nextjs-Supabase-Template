@@ -1,4 +1,4 @@
 // Schemas
-export { profiles } from "./profiles/profile.shema";
+export { profiles } from "./profiles/profile.schema";
 
 // Relations

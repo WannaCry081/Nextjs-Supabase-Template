@@ -25,13 +25,13 @@ features:
   - title: Authentication UI
     details: Pre-built authentication UI with modern design patterns
   - title: Code Quality
-    details: ESLint, Prettier, and Husky for code quality
+    details: ESLint and Prettier for code quality
   - title: Documentation
     details: VitePress documentation site included and customizable
   - title: Docker Ready
     details: Docker containerized for seamless deployment
   - title: Email Management
-    details: Nodemailer email management system
+    details: Resend email management system
   - title: CI/CD Workflows
     details: GitHub Actions for CI/CD workflows
 ---
