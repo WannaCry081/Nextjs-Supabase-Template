@@ -1,7 +1,7 @@
 "use client";
 
 import { createStore, type StoreApi } from "zustand";
-import { createContext, PropsWithChildren, useEffect, useMemo, useRef } from "react";
+import { createContext, PropsWithChildren, useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 // Types
@@ -35,45 +35,48 @@ export const UserProfileProvider = ({ children }: PropsWithChildren) => {
 
   const { data, isLoading, error: queryError, refetch } = useQuery(getProfileQueryOptions());
 
-  const storeRef = useRef<UserProfileStore | null>(null);
+  const [store] = useState<UserProfileStore>(() =>
+    createStore<UserProfileState>(() => ({
+      loading: false,
+      error: null,
+      data: null,
+      actions: {
+        hydrate: async () => undefined,
+        clear: () => undefined,
+      },
+    }))
+  );
 
   const actions = useMemo<UserProfileState["actions"]>(() => {
     return {
       hydrate: async () => {
-        storeRef.current?.setState({ loading: true, error: null });
+        store.setState({ loading: true, error: null });
         const result = await refetch();
 
         if (result.error) {
-          storeRef.current?.setState({
+          store.setState({
             error: toErrorMessage(result.error) ?? "Failed to load profile",
             loading: false,
           });
           return;
         }
 
-        storeRef.current?.setState({
+        store.setState({
           data: result.data ?? null,
           loading: false,
           error: null,
         });
       },
       clear: () => {
-        storeRef.current?.setState({ data: null, loading: false, error: null });
+        store.setState({ data: null, loading: false, error: null });
         queryClient.removeQueries({ queryKey: getProfileQueryOptions().queryKey });
       },
     };
-  }, [queryClient, refetch]);
+  }, [queryClient, refetch, store]);
 
-  if (!storeRef.current) {
-    storeRef.current = createStore<UserProfileState>(() => ({
-      loading: isLoading,
-      error: toErrorMessage(queryError),
-      data: data ?? null,
-      actions,
-    }));
-  }
-
-  const store = storeRef.current;
+  useEffect(() => {
+    store.setState({ actions });
+  }, [store, actions]);
 
   useEffect(() => {
     store.setState({
