@@ -16,7 +16,8 @@
     "format": "prettier --write .",
     "docs:dev": "vitepress dev docs --watch",
     "docs:build": "vitepress build docs",
-    "docs:preview": "vitepress preview docs"
+    "docs:preview": "vitepress preview docs",
+    "test": "vitest"
   },
   "dependencies": {
     "@hookform/resolvers": "5.2.2",
