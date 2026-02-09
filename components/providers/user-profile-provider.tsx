@@ -1,10 +1,20 @@
 "use client";
 
 import { createStore, type StoreApi } from "zustand";
-import { createContext, useState, PropsWithChildren, useEffect } from "react";
+import { createContext, PropsWithChildren, useEffect, useMemo, useRef } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 // Types
 import type { SelectProfile } from "@/types/drizzle.types";
+
+// Queries
+import { getProfileQueryOptions } from "@/queries/profile.query";
+
+const toErrorMessage = (err: unknown): string | null => {
+  if (!err) return null;
+  if (err instanceof Error) return err.message;
+  return String(err);
+};
 
 type UserProfileState = {
   loading: boolean;
@@ -21,46 +31,57 @@ export type UserProfileStore = StoreApi<UserProfileState>;
 export const UserProfileContext = createContext<UserProfileStore | null>(null);
 
 export const UserProfileProvider = ({ children }: PropsWithChildren) => {
-  const [store] = useState(() =>
-    createStore<UserProfileState>((set) => ({
-      loading: true,
-      error: null,
-      data: null,
-      actions: {
-        hydrate: async () => {
-          set({ loading: true, error: null });
-          try {
-            const response = await fetch("/api/users/me");
+  const queryClient = useQueryClient();
 
-            if (response.status === 401) {
-              set({ data: null, loading: false });
-              return;
-            }
+  const { data, isLoading, error: queryError, refetch } = useQuery(getProfileQueryOptions());
 
-            if (!response.ok) {
-              throw new Error(await response.text());
-            }
+  const storeRef = useRef<UserProfileStore | null>(null);
 
-            const data = await response.json();
+  const actions = useMemo<UserProfileState["actions"]>(() => {
+    return {
+      hydrate: async () => {
+        storeRef.current?.setState({ loading: true, error: null });
+        const result = await refetch();
 
-            set({ data: data.data ?? null, loading: false });
-          } catch (error: unknown) {
-            set({
-              error: error instanceof Error ? error.message : "Failed to load profile",
-              loading: false,
-            });
-          }
-        },
-        clear: () => {
-          set({ data: null, loading: false, error: null });
-        },
+        if (result.error) {
+          storeRef.current?.setState({
+            error: toErrorMessage(result.error) ?? "Failed to load profile",
+            loading: false,
+          });
+          return;
+        }
+
+        storeRef.current?.setState({
+          data: result.data ?? null,
+          loading: false,
+          error: null,
+        });
       },
-    }))
-  );
+      clear: () => {
+        storeRef.current?.setState({ data: null, loading: false, error: null });
+        queryClient.removeQueries({ queryKey: getProfileQueryOptions().queryKey });
+      },
+    };
+  }, [queryClient, refetch]);
+
+  if (!storeRef.current) {
+    storeRef.current = createStore<UserProfileState>(() => ({
+      loading: isLoading,
+      error: toErrorMessage(queryError),
+      data: data ?? null,
+      actions,
+    }));
+  }
+
+  const store = storeRef.current;
 
   useEffect(() => {
-    store.getState().actions.hydrate();
-  }, [store]);
+    store.setState({
+      loading: isLoading,
+      error: toErrorMessage(queryError),
+      data: data ?? null,
+    });
+  }, [store, data, isLoading, queryError]);
 
   return <UserProfileContext.Provider value={store}>{children}</UserProfileContext.Provider>;
 };
