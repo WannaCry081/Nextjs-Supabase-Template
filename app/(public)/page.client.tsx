@@ -119,7 +119,7 @@ export const PageClient = () => {
           </p>
 
           <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-balance mb-4 sm:mb-6 leading-tight">
-            Ship full-stack apps in days, not months
+            Ship Full-Stack Apps in Days, not Months
           </h1>
 
           <p className="text-base sm:text-lg md:text-xl text-muted-foreground text-balance mb-8 sm:mb-12 max-w-2xl leading-relaxed">
