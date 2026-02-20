@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
-import { db } from "@/lib/drizzle/db";
+import { getDb } from "@/lib/drizzle/db";
 import { profiles } from "@/drizzle/schemas";
 
 import { getSupabaseServer } from "@/lib/supabase/server";
@@ -26,6 +26,7 @@ export async function GET() {
     );
   }
 
+  const db = getDb();
   const response = await db.select().from(profiles).where(eq(profiles.id, user.id)).limit(1);
 
   return NextResponse.json(
