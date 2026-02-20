@@ -1,13 +1,22 @@
 import postgres from "postgres";
 import { drizzle } from "drizzle-orm/postgres-js";
 
-const connectionString = process.env.DATABASE_URL;
+let db: ReturnType<typeof drizzle> | null = null;
 
-if (!connectionString) {
-  throw new Error("DATABASE_URL environment variable is not set");
-}
+export const getDb = () => {
+  if (db) {
+    return db;
+  }
 
-// Disable prefetch as it is not supported for "Transaction" pool mode
-const client = postgres(connectionString, { prepare: false });
+  const connectionString = process.env.DATABASE_URL;
 
-export const db = drizzle(client);
+  if (!connectionString) {
+    throw new Error("DATABASE_URL environment variable is not set");
+  }
+
+  // Disable prefetch as it is not supported for "Transaction" pool mode.
+  const client = postgres(connectionString, { prepare: false });
+  db = drizzle(client);
+
+  return db;
+};
