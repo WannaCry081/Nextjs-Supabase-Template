@@ -302,7 +302,7 @@ Notes:
 
 **Use kebab-case for ALL files:**
 
-```
+```text
 ✅ Correct:
 - login-form.tsx
 - user-profile-card.tsx
@@ -333,7 +333,7 @@ Notes:
 
 ## Project Structure
 
-```
+```text
 nextjs-supabase-template/
 ├── app/                           # Next.js App Router
 │   ├── (auth)/                    # Auth route group (no URL segment)
@@ -485,7 +485,7 @@ nextjs-supabase-template/
 
 ### Component Hierarchy Rules
 
-```
+```text
 ui/          → Base primitives (DO NOT MODIFY)
   ↑
 shared/      → Reusable wrappers and compositions
@@ -738,7 +738,7 @@ const result = await db.select().from(profiles).where(eq(profiles.id, user.id)).
 
 The data-fetching pattern flows in three layers:
 
-```
+```text
 Service (services/*.service.ts)
   → fetch wrapper for API routes
   → handles HTTP errors, returns typed data or null
@@ -923,7 +923,7 @@ export default function Error({
 
 ### Structure
 
-```
+```text
 docs/
 ├── .vitepress/
 │   └── config.mts        # VitePress configuration
