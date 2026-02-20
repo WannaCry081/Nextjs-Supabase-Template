@@ -44,8 +44,8 @@ export const SiteHeader = () => {
         <Breadcrumb className="hidden sm:block">
           <BreadcrumbList>
             {pathItems.map((item, index) => (
-              <React.Fragment key={index}>
-                <BreadcrumbItem key={index}>
+              <React.Fragment key={item.path}>
+                <BreadcrumbItem>
                   {pathItems.length - 1 > index ? (
                     <BreadcrumbLink href={item.path}>{item.title}</BreadcrumbLink>
                   ) : (
