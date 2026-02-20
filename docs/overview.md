@@ -95,76 +95,34 @@ Add any route pattern to `PROTECTED_ROUTES` to require authentication. The middl
 
 ## Using State Management
 
-This template uses **Zustand** combined with **React Context** for optimal state management. This pattern provides the simplicity of Zustand with the dependency injection benefits of Context. Learn more about this approach in [this detailed guide](https://tkdodo.eu/blog/zustand-and-react-context).
+This template uses **React Context** with **TanStack Query** for simple and efficient state management. The Context provides dependency injection, while Query handles data fetching, caching, and synchronization.
 
-### Zustand + React Context Pattern
+### React Context Pattern
 
-**Create a Store Provider:**
+**Create a Context Provider:**
 
 ```typescript
 // components/providers/user-profile-provider.tsx
 "use client";
 
-import { createStore, type StoreApi } from "zustand";
-import { createContext, useState, PropsWithChildren, useEffect } from "react";
+import { createContext, PropsWithChildren } from "react";
+import { useQuery } from "@tanstack/react-query";
 import type { SelectProfile } from "@/types/drizzle.types";
+import { getProfileQueryOptions } from "@/queries/profile.query";
 
-type UserProfileState = {
-  loading: boolean;
-  error: string | null;
-  data: SelectProfile | null;
-  actions: {
-    hydrate: () => Promise<void>;
-    clear: () => void;
-  };
+type UserProfileContextType = {
+  profile: SelectProfile | null;
+  isLoading: boolean;
+  error: Error | null;
 };
 
-export type UserProfileStore = StoreApi<UserProfileState>;
-export const UserProfileContext = createContext<UserProfileStore | null>(null);
+export const UserProfileContext = createContext<UserProfileContextType | null>(null);
 
 export const UserProfileProvider = ({ children }: PropsWithChildren) => {
-  const [store] = useState(() =>
-    createStore<UserProfileState>((set) => ({
-      loading: true,
-      error: null,
-      data: null,
-      actions: {
-        hydrate: async () => {
-          set({ loading: true, error: null });
-          try {
-            const response = await fetch("/api/users/me");
-
-            if (response.status === 401) {
-              set({ data: null, loading: false });
-              return;
-            }
-
-            if (!response.ok) {
-              throw new Error(await response.text());
-            }
-
-            const data = await response.json();
-            set({ data: data.data ?? null, loading: false });
-          } catch (error: unknown) {
-            set({
-              error: error instanceof Error ? error.message : "Failed to load profile",
-              loading: false,
-            });
-          }
-        },
-        clear: () => {
-          set({ data: null, loading: false, error: null });
-        },
-      },
-    }))
-  );
-
-  useEffect(() => {
-    store.getState().actions.hydrate();
-  }, [store]);
+  const { data, isLoading, error } = useQuery(getProfileQueryOptions());
 
   return (
-    <UserProfileContext.Provider value={store}>
+    <UserProfileContext.Provider value={{ profile: data ?? null, isLoading, error }}>
       {children}
     </UserProfileContext.Provider>
   );
@@ -174,24 +132,18 @@ export const UserProfileProvider = ({ children }: PropsWithChildren) => {
 **Create a Custom Hook:**
 
 ```typescript
-// hooks/use-user-profile-store.ts
+// hooks/use-user-profile.ts
 import { useContext } from "react";
-import { useStore } from "zustand";
-import {
-  UserProfileContext,
-  type UserProfileStore,
-} from "@/components/providers/user-profile-provider";
+import { UserProfileContext } from "@/components/providers/user-profile-provider";
 
-export const useUserProfileStore = <T>(
-  selector: (state: ReturnType<UserProfileStore["getState"]>) => T
-) => {
-  const store = useContext(UserProfileContext);
+export const useUserProfile = () => {
+  const context = useContext(UserProfileContext);
 
-  if (!store) {
-    throw new Error("`useUserProfileStore` must be used within a UserProfileProvider");
+  if (!context) {
+    throw new Error("`useUserProfile` must be used within a UserProfileProvider");
   }
 
-  return useStore(store, selector);
+  return context;
 };
 ```
 
@@ -200,26 +152,17 @@ export const useUserProfileStore = <T>(
 ```typescript
 "use client";
 
-import { useUserProfileStore } from "@/hooks/use-user-profile-store";
+import { useUserProfile } from "@/hooks/use-user-profile";
 
 export function UserProfile() {
-  const { data, loading, error } = useUserProfileStore(
-    (state) => ({
-      data: state.data,
-      loading: state.loading,
-      error: state.error,
-    })
-  );
+  const { profile, isLoading, error } = useUserProfile();
 
-  const { clear } = useUserProfileStore((state) => state.actions);
-
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error}</div>;
+  if (isLoading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error.message}</div>;
 
   return (
     <div>
-      <h1>{data?.name}</h1>
-      <button onClick={clear}>Clear Profile</button>
+      <h1>{profile?.name}</h1>
     </div>
   );
 }
@@ -227,15 +170,16 @@ export function UserProfile() {
 
 ### Why This Pattern?
 
-- **Zustand Benefits**: Minimal boilerplate, zero dependencies, excellent performance with selectors
-- **React Context Benefits**: Scoped state, easy dependency injection, type-safe
-- **Combined**: Each provider instance has its own store, enabling fine-grained control and testing
+- **Simplicity**: No extra libraries, just React Context and TanStack Query
+- **Type Safety**: Full TypeScript support with proper type inference
+- **Performance**: TanStack Query handles caching and deduplication automatically
+- **Scoped State**: Each provider instance is independent for fine-grained control
 
 ### Setting Up New Providers
 
-1. Create a store type and provider component
-2. Create a custom hook for accessing the store
-3. Wrap your app with the provider at the appropriate level
+1. Create a Context with the necessary state type
+2. Create a Provider component that manages the data
+3. Create a custom hook for accessing the context
 
 ## Using SEO helper function
 
