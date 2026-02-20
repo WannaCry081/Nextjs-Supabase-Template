@@ -19,7 +19,7 @@ import { NavUser } from "@/components/app-sidebar/nav-user";
 import { NavPrimary } from "./nav-primary";
 
 // Hooks
-import { useUserProfileStore } from "@/hooks/use-user-profile-store";
+import { useUserProfile } from "@/hooks/use-user-profile";
 
 // Contants
 import { APP_SIDEBAR_ITEMS } from "@/constants/app-sidebar-items.constant";
@@ -33,10 +33,9 @@ export const AppSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) =
   const router = useRouter();
   const supabase = getSupabaseClient();
 
-  const { data, loading, actions } = useUserProfileStore((state) => state);
+  const { profile, isLoading } = useUserProfile();
 
   const handleSignOut = async () => {
-    actions.clear();
     await supabase.auth.signOut();
     router.push("/");
   };
@@ -65,10 +64,10 @@ export const AppSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) =
         <NavSecondary {...APP_SIDEBAR_ITEMS.secondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
-        {loading ? (
+        {isLoading ? (
           <Skeleton className="h-10 w-full rounded-lg" />
         ) : (
-          <NavUser user={data} handleSignOut={handleSignOut} />
+          <NavUser user={profile} handleSignOut={handleSignOut} />
         )}
       </SidebarFooter>
     </Sidebar>
