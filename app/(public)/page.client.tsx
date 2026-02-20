@@ -10,7 +10,7 @@ import { useAuth } from "@/hooks/use-auth";
 
 const features = [
   "Supabase authentication and CRUD operations with Drizzle ORM",
-  "Stripe payments integration for subscriptions and transactions",
+  "Proxy-based session refresh and protected route redirects",
   "Pre-built authentication UI with modern design patterns",
   "ESLint and Prettier for code quality",
   "VitePress documentation site included and customizable",

@@ -20,8 +20,8 @@ hero:
 features:
   - title: Supabase Integration
     details: Supabase authentication and CRUD operations with Drizzle ORM
-  - title: Stripe Payments
-    details: Stripe payments integration for subscriptions and transactions
+  - title: Route Protection
+    details: Proxy-based session refresh and protected route redirects
   - title: Authentication UI
     details: Pre-built authentication UI with modern design patterns
   - title: Code Quality
