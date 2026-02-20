@@ -5,8 +5,6 @@ import { getSupabaseServer } from "@/lib/supabase/server";
 
 export const runtime = "nodejs"; // important: keep this on Node.js runtime
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 export async function POST(req: Request) {
   try {
     const supabase = await getSupabaseServer();
@@ -27,8 +25,19 @@ export async function POST(req: Request) {
       );
     }
 
+    const resendApiKey = process.env.RESEND_API_KEY;
+    const resendEmailFrom = process.env.RESEND_EMAIL_FROM;
+
+    if (!resendApiKey || !resendEmailFrom) {
+      return NextResponse.json(
+        { success: false, error: "Email service is not configured" },
+        { status: 500 }
+      );
+    }
+
+    const resend = new Resend(resendApiKey);
     const result = await resend.emails.send({
-      from: process.env.RESEND_EMAIL_FROM,
+      from: resendEmailFrom,
       to,
       subject,
       html,
