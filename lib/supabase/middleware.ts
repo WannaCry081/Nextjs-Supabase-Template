@@ -8,10 +8,8 @@ export async function updateSession(request: NextRequest, protectedRoutes: strin
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
     {
       cookies: {
-        getAll() {
-          return request.cookies.getAll();
-        },
-        setAll(cookiesToSet) {
+        getAll: () => request.cookies.getAll(),
+        setAll: (cookiesToSet) => {
           cookiesToSet.forEach(({ name, value, options }) =>
             response.cookies.set(name, value, options)
           );
@@ -21,30 +19,21 @@ export async function updateSession(request: NextRequest, protectedRoutes: strin
   );
 
   const { data } = await supabase.auth.getClaims();
-
   const user = data?.claims;
   const pathname = request.nextUrl.pathname;
 
-  const matchesRoute = (pattern: string, pathname: string) => {
-    // Support wildcard patterns like "/dashboard/*" which should match
-    // both "/dashboard" and any nested path like "/dashboard/settings".
+  const isProtected = protectedRoutes.some((pattern) => {
     if (pattern.endsWith("/*")) {
       const base = pattern.slice(0, -2);
       return pathname === base || pathname.startsWith(`${base}/`);
     }
-
-    // Exact or prefix match for non-wildcard patterns
     return pathname === pattern || pathname.startsWith(`${pattern}/`);
-  };
-
-  const isProtected = protectedRoutes.some((pattern) => matchesRoute(pattern, pathname));
+  });
 
   if (isProtected && !user) {
     const url = request.nextUrl.clone();
-
     url.pathname = "/login";
     url.searchParams.set("redirect", pathname);
-
     return NextResponse.redirect(url);
   }
 
