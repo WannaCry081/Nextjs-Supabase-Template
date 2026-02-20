@@ -46,7 +46,7 @@ const { error } = await supabase.auth.signInWithOAuth({
 });
 ```
 
-All forms use **React Hook Form** with **Zod validation** for type-safe form handling. Protected routes automatically redirect unauthenticated users to the login page via middleware.
+All forms use **React Hook Form** with **Zod validation** for type-safe form handling. Protected routes automatically redirect unauthenticated users to the login page via proxy.
 
 ### Sidebar
 
@@ -84,14 +84,14 @@ The sidebar automatically renders all items with icons and handles navigation. T
 
 ### Proxy & Protected Routes
 
-Protect routes using the middleware in `middleware.ts`. All specified routes require authentication:
+Protect routes using the proxy in `proxy.ts`. All specified routes require authentication:
 
 ```typescript
-// middleware.ts
+// proxy.ts
 const PROTECTED_ROUTES: string[] = ["/dashboard/*", "/settings/*", "/admin/*"];
 ```
 
-Add any route pattern to `PROTECTED_ROUTES` to require authentication. The middleware automatically intercepts requests and redirects unauthenticated users to the login page.
+Add any route pattern to `PROTECTED_ROUTES` to require authentication. The proxy automatically intercepts requests and redirects unauthenticated users to the login page.
 
 ## Using State Management
 
