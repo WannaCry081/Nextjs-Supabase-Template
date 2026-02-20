@@ -2,13 +2,8 @@ name: Build Project
 
 on:
   push:
-    branches:
-      - main
-      - master
+    branches: [main, master, develop, dev]
   pull_request:
-    branches:
-      - main
-      - master
 
 jobs:
   build:
@@ -21,7 +16,8 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: latest
+          version: "9"
+          run_install: false
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -37,4 +33,3 @@ jobs:
 
       - name: Build project
         run: pnpm run build
-        
