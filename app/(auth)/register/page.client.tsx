@@ -38,13 +38,14 @@ export const PageClient = () => {
   });
 
   const onFormSubmit = (values: z.infer<typeof formSchema>) => {
-    try {
-      startTransition(async () => {
+    startTransition(async () => {
+      try {
         const { error } = await supabase.auth.signUp({
-          ...values,
+          email: values.email,
+          password: values.password,
           options: {
             data: {
-              ...values,
+              name: values.name,
             },
             emailRedirectTo: `${window.location.origin}/dashboard`,
           },
@@ -62,13 +63,13 @@ export const PageClient = () => {
         });
 
         form.reset();
-      });
-    } catch (error) {
-      console.error(error);
-      toast.error("Something went wrong", {
-        description: "There was an issue registering you. Please try again later.",
-      });
-    }
+      } catch (error) {
+        console.error(error);
+        toast.error("Something went wrong", {
+          description: "There was an issue registering you. Please try again later.",
+        });
+      }
+    });
   };
 
   return (

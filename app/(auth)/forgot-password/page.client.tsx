@@ -33,8 +33,8 @@ export const PageClient = () => {
   });
 
   const onFormSubmit = (values: z.infer<typeof formSchema>) => {
-    try {
-      startTransition(async () => {
+    startTransition(async () => {
+      try {
         const { error } = await supabase.auth.resetPasswordForEmail(values.email, {
           redirectTo: `${window.location.origin}/reset-password`,
         });
@@ -51,13 +51,13 @@ export const PageClient = () => {
         });
 
         form.reset();
-      });
-    } catch (error) {
-      console.error(error);
-      toast.error("Something went wrong", {
-        description: "There was an issue sending the reset email. Please try again later.",
-      });
-    }
+      } catch (error) {
+        console.error(error);
+        toast.error("Something went wrong", {
+          description: "There was an issue sending the reset email. Please try again later.",
+        });
+      }
+    });
   };
 
   return (

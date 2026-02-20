@@ -45,8 +45,8 @@ export const PageClient = () => {
   });
 
   const onFormSubmit = (values: z.infer<typeof formSchema>) => {
-    try {
-      startTransition(async () => {
+    startTransition(async () => {
+      try {
         const { error } = await supabase.auth.signInWithPassword({
           ...values,
         });
@@ -59,18 +59,18 @@ export const PageClient = () => {
         }
 
         router.replace("/dashboard");
-      });
-    } catch (error) {
-      console.error(error);
-      toast.error("Something went wrong", {
-        description: "There was an issue logging you in. Please try again later.",
-      });
-    }
+      } catch (error) {
+        console.error(error);
+        toast.error("Something went wrong", {
+          description: "There was an issue logging you in. Please try again later.",
+        });
+      }
+    });
   };
 
   const onOAuthSubmit = (provider: "github" | "google") => {
-    try {
-      startTransition(async () => {
+    startTransition(async () => {
+      try {
         const normalizedProviderName = provider.charAt(0).toUpperCase() + provider.slice(1);
 
         const { error } = await supabase.auth.signInWithOAuth({
@@ -88,13 +88,13 @@ export const PageClient = () => {
         }
 
         router.replace("/dashboard");
-      });
-    } catch (error) {
-      console.error(error);
-      toast.error("Something went wrong", {
-        description: "There was an issue logging you in. Please try again later.",
-      });
-    }
+      } catch (error) {
+        console.error(error);
+        toast.error("Something went wrong", {
+          description: "There was an issue logging you in. Please try again later.",
+        });
+      }
+    });
   };
 
   return (

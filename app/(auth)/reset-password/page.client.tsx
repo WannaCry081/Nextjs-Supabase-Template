@@ -33,8 +33,8 @@ export const PageClient = () => {
   });
 
   const onFormSubmit = (values: z.infer<typeof formSchema>) => {
-    try {
-      startTransition(async () => {
+    startTransition(async () => {
+      try {
         const { error } = await supabase.auth.updateUser({
           password: values.password,
         });
@@ -51,13 +51,13 @@ export const PageClient = () => {
         });
 
         form.reset();
-      });
-    } catch (error) {
-      console.error(error);
-      toast.error("Something went wrong", {
-        description: "There was an issue resetting your password. Please try again later.",
-      });
-    }
+      } catch (error) {
+        console.error(error);
+        toast.error("Something went wrong", {
+          description: "There was an issue resetting your password. Please try again later.",
+        });
+      }
+    });
   };
 
   return (
