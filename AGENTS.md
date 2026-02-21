@@ -156,6 +156,13 @@ Notes:
 
 ## Coding Standards
 
+### Simplicity First (No Overengineering)
+
+- Prefer the simplest solution that works; avoid complex abstractions, patterns, or frameworks unless clearly necessary.
+- Choose small, readable changes over clever or generalized refactors.
+- If a change can be solved in one file or layer, do not split it across multiple layers without strong justification.
+- Add only the minimum needed error handling or configuration to meet requirements.
+
 ### Formatting and Lint
 
 - Prettier rules: semicolons, double quotes, trailing commas `es5`, width 100 (`.prettierrc`).
