@@ -1,12 +1,10 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 
-// Providers
 import { AppProvider } from "@/components/providers/app-provider";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { ReactQueryProvider } from "@/components/providers/react-query-provider";
 
-// Styles
 import "./styles/globals.css";
 import { buildMetadata } from "@/lib/seo";
 

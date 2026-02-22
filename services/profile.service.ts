@@ -2,15 +2,7 @@ import type { SelectProfile } from "@/types/drizzle.types";
 import { API_ROUTES } from "@/constants/routes.constant";
 import { API_HEADERS } from "@/constants/api.constant";
 
-/**
- * Profile Service
- * Handles all profile-related API requests
- */
 export const profileService = {
-  /**
-   * Fetches the current authenticated user's profile
-   * @returns Profile data or null if not found/unauthorized
-   */
   me: async (): Promise<SelectProfile | null> => {
     const response = await fetch(API_ROUTES.USERS_ME, {
       method: "GET",

@@ -3,10 +3,8 @@
 import { createContext, PropsWithChildren } from "react";
 import { useQuery } from "@tanstack/react-query";
 
-// Types
 import type { SelectProfile } from "@/types/drizzle.types";
 
-// Queries
 import { getProfileQueryOptions } from "@/queries/profile.query";
 
 type UserProfileContextType = {

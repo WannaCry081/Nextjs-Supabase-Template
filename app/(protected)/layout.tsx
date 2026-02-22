@@ -1,11 +1,9 @@
 import { PropsWithChildren } from "react";
 
-// Components
 import { AppSidebar } from "@/components/app-sidebar";
 import { SiteHeader } from "@/components/app-sidebar/site-header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
-// Providers
 import { UserProfileProvider } from "@/components/providers/user-profile-provider";
 
 export default function Layout({ children }: PropsWithChildren) {

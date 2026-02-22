@@ -3,6 +3,7 @@ import { User } from "@supabase/supabase-js";
 
 import { apiResponse } from "@/lib/api-response";
 import { getSupabaseServer } from "@/lib/supabase/server";
+
 import { HttpStatus } from "@/constants/http-status.constant";
 import { AUTH_ERRORS } from "@/constants/http-error-messages.constant";
 

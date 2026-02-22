@@ -1,5 +1,5 @@
-import { Resend } from "resend";
 import { z } from "zod";
+import { Resend } from "resend";
 
 import { env } from "@/lib/env";
 import { apiResponse } from "@/lib/api-response";

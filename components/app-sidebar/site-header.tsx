@@ -4,7 +4,6 @@ import React, { useMemo } from "react";
 import { SidebarIcon } from "lucide-react";
 import { usePathname } from "next/navigation";
 
-// Components
 import {
   Breadcrumb,
   BreadcrumbItem,

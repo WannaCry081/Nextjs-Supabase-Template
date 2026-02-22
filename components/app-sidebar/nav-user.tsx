@@ -3,7 +3,6 @@
 import { Activity } from "react";
 import { ChevronsUpDown, LogOut } from "lucide-react";
 
-// Components
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -20,8 +19,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 
-// Types
-import { SelectProfile } from "@/types/drizzle.types";
+import type { SelectProfile } from "@/types/drizzle.types";
 
 interface NavUserProps {
   user: SelectProfile | null;

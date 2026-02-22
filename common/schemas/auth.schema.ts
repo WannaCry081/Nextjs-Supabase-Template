@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-const emailSchema = z.string().email("Please enter a valid email address");
+const emailSchema = z.email("Please enter a valid email address");
 const passwordSchema = z.string().min(6, "Password must be at least 6 characters long");
 const nameSchema = z.string().min(2, "Name must be at least 2 characters long");
 
