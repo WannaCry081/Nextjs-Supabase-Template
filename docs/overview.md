@@ -4,255 +4,333 @@ outline: deep
 
 # Getting Started
 
-This is a modern **Next.js + Supabase template** designed to accelerate full-stack development. It combines Next.js 16 for the frontend, Supabase for authentication and database, Drizzle ORM for type-safe database operations, TanStack Query for data fetching, and Resend for email functionality. The template includes pre-configured authentication pages, protected routes, sidebar navigation, and a robust API structure.
+Welcome to the **Next.js + Supabase Template**! This is a production-ready starter for building modern full-stack applications with Next.js 16, Supabase authentication, Drizzle ORM, and TanStack Query.
 
-## Using boilerplate
+## What's Included
 
-### Authentication
+✨ **Frontend**
 
-The template provides a complete authentication system with pre-built pages for all auth flows:
+- Next.js 16 with App Router and route groups
+- Beautifully designed authentication UI with OAuth support
+- Protected routes with proxy-based session management
+- Sidebar navigation with responsive design
+- Modern component library (Shadcn/ui + Radix)
 
-**Available Auth Pages:**
+🔐 **Backend & Database**
 
-- **Login** (`/login`) - Email/password sign-in with OAuth providers (GitHub, Google)
-- **Register** (`/register`) - User account creation with email verification
-- **Forgot Password** (`/forgot-password`) - Password recovery initiation
-- **Reset Password** (`/reset-password`) - Complete password reset flow
+- Supabase authentication (email/password + OAuth)
+- Drizzle ORM for type-safe database operations
+- Database migrations and Drizzle Studio support
+- Centralized API response handling
 
-**How it works:**
+🚀 **Developer Experience**
 
-```typescript
-// app/(auth)/login/page.tsx
-const onFormSubmit = async (values: z.infer<typeof formSchema>) => {
-  const { error } = await supabase.auth.signInWithPassword({
-    email: values.email,
-    password: values.password,
-  });
+- Type-safe patterns for routes, forms, API responses
+- TanStack Query for data fetching and caching
+- Consistent error handling across the app
+- Comprehensive documentation with examples
+- Docker support for deployment
 
-  if (error) {
-    toast.error("Login failed");
-    return;
-  }
+## Quick Start
 
-  router.replace("/dashboard");
-};
+### Installation
 
-// OAuth Login
-const { error } = await supabase.auth.signInWithOAuth({
-  provider: "github", // or "google"
-  options: {
-    redirectTo: `${window.location.origin}/dashboard`,
-  },
-});
+```bash
+# Install dependencies
+pnpm install
+
+# Create environment file
+cp .env.example .env.local
+
+# Start development server
+pnpm start:development
 ```
 
-All forms use **React Hook Form** with **Zod validation** for type-safe form handling. Protected routes automatically redirect unauthenticated users to the login page via proxy.
+Visit `http://localhost:3000` and explore the template!
 
-### Sidebar
+### Environment Setup
 
-The sidebar navigation is managed through a centralized configuration file. Add or modify navigation items in `constants/app-sidebar-items.ts`:
+Required environment variables (see `.env.example`):
+
+```bash
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your_anon_key
+DATABASE_URL=your_database_url
+
+# Email (optional)
+RESEND_API_KEY=your_resend_key
+RESEND_EMAIL_FROM=noreply@yourdomain.com
+
+# Site
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
+```
+
+## Template Structure
+
+### Route Groups
+
+The app is organized into three main sections:
+
+| Route Group   | Purpose                 | Path Pattern                                    |
+| ------------- | ----------------------- | ----------------------------------------------- |
+| `(public)`    | Marketing landing page  | `/`                                             |
+| `(auth)`      | Authentication flows    | `/login`, `/register`, `/forgot-password`, etc. |
+| `(protected)` | Authenticated app shell | `/dashboard`, `/settings`, etc.                 |
+
+Each group has its own layout, styling, and logic.
+
+### Key Directories
+
+```
+app/                 # Next.js App Router
+├── (auth)/         # Auth pages & forms
+├── (protected)/    # Dashboard & protected routes
+├── (public)/       # Marketing pages
+└── api/            # API endpoints
+
+components/         # React components
+├── providers/      # Context providers (React Query, theme, etc.)
+├── app-sidebar/    # Sidebar navigation shell
+├── shared/         # Reusable components
+└── ui/             # Shadcn/ui primitives (don't modify)
+
+lib/               # Utilities & helpers
+├── supabase/      # Supabase client setup
+├── drizzle/       # Database connection
+├── query/         # React Query setup
+└── api-response.ts # Response formatting
+
+drizzle/           # Database schema & migrations
+├── schemas/       # Table definitions
+└── migrations/    # SQL migrations
+
+common/            # Shared domain logic
+├── guards/        # Auth guards
+└── schemas/       # Zod validation schemas
+
+constants/         # App-wide constants
+├── routes.constant.ts      # URL definitions
+├── http-status.constant.ts # HTTP status codes
+└── app-sidebar-items.constant.ts # Navigation items
+```
+
+## Core Features
+
+### 🔐 Authentication
+
+The template includes a complete auth system:
+
+**Available Pages:**
+
+- **Login** (`/login`) - Email/password + GitHub/Google OAuth
+- **Register** (`/register`) - Create account with email verification
+- **Forgot Password** (`/forgot-password`) - Request password reset
+- **Reset Password** (`/reset-password`) - Complete the reset flow
+
+All forms use Zod schemas (defined in `common/schemas/auth.schema.ts`) for validation.
+
+**Example:**
 
 ```typescript
-// constants/app-sidebar-items.ts
-import { Frame, Map, PieChart } from "lucide-react";
+"use client";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { loginSchema } from "@/common/schemas/auth.schema";
+
+export function LoginForm() {
+  const form = useForm({
+    resolver: zodResolver(loginSchema),
+  });
+
+  const onSubmit = async (data) => {
+    const { error } = await supabase.auth.signInWithPassword({
+      email: data.email,
+      password: data.password,
+    });
+
+    if (error) {
+      toast.error("Login failed");
+      return;
+    }
+
+    router.replace("/dashboard");
+  };
+
+  return (
+    <form onSubmit={form.handleSubmit(onSubmit)}>
+      {/* form fields */}
+    </form>
+  );
+}
+```
+
+### 🔒 Protected Routes
+
+Routes require authentication via the proxy middleware:
+
+**Define Protected Routes** (`proxy.ts`):
+
+```typescript
+const PROTECTED_ROUTES: string[] = ["/dashboard/*", "/settings/*", "/admin/*"];
+```
+
+Unauthenticated users are redirected to `/login` automatically.
+
+### 🗂️ Navigation & Sidebar
+
+Edit `constants/app-sidebar-items.constant.ts` to customize sidebar navigation:
+
+```typescript
+import { Home, Settings, BarChart3 } from "lucide-react";
 
 export const APP_SIDEBAR_ITEMS = {
   platform: {
     title: "Platform",
     items: [
-      {
-        name: "Design Engineering",
-        url: "/design-engineering",
-        icon: Frame,
-      },
-      {
-        name: "Sales & Marketing",
-        url: "/sales-marketing",
-        icon: PieChart,
-      },
-      {
-        name: "Travel",
-        url: "/travel",
-        icon: Map,
-      },
+      { name: "Dashboard", url: "/dashboard", icon: Home },
+      { name: "Analytics", url: "/analytics", icon: BarChart3 },
+      { name: "Settings", url: "/settings", icon: Settings },
     ],
   },
 };
 ```
 
-The sidebar automatically renders all items with icons and handles navigation. To add new sections, simply extend the `APP_SIDEBAR_ITEMS` object with additional categories and items.
+### 📡 API Development
 
-### Proxy & Protected Routes
+Create type-safe API endpoints with consistent response formatting:
 
-Protect routes using the proxy in `proxy.ts`. All specified routes require authentication:
+**Example Endpoint:**
 
 ```typescript
-// proxy.ts
-const PROTECTED_ROUTES: string[] = ["/dashboard/*", "/settings/*", "/admin/*"];
+// app/api/users/me/route.ts
+import { apiResponse } from "@/lib/api-response";
+import { requireAuth } from "@/common/guards/auth.guard";
+import { HttpStatus } from "@/constants/http-status.constant";
+
+export async function GET() {
+  const { user, error } = await requireAuth();
+  if (error) return error;
+
+  const profile = await db.select().from(profiles).where(eq(profiles.id, user.id)).limit(1);
+
+  return apiResponse({
+    data: profile[0] ?? null,
+    status: HttpStatus.OK,
+  });
+}
 ```
 
-Add any route pattern to `PROTECTED_ROUTES` to require authentication. The proxy automatically intercepts requests and redirects unauthenticated users to the login page.
+All endpoints return a consistent shape:
 
-## Using State Management
+```json
+{
+  "success": true,
+  "data": {
+    /* your data */
+  },
+  "error": null
+}
+```
 
-This template uses **React Context** with **TanStack Query** for simple and efficient state management. The Context provides dependency injection, while Query handles data fetching, caching, and synchronization.
+## 📊 Data Management
 
-### React Context Pattern
+### TanStack React Query
 
-**Create a Context Provider:**
+Handle data fetching, caching, and synchronization:
+
+**1. Define Query Options:**
+
+```typescript
+// queries/profile.query.ts
+import { queryOptions } from "@tanstack/react-query";
+import { queryKeys } from "@/lib/query/query-keys";
+import { profileService } from "@/services/profile.service";
+
+export const getProfileQueryOptions = () =>
+  queryOptions({
+    queryKey: queryKeys.profile.me(),
+    queryFn: () => profileService.me(),
+  });
+```
+
+**2. Use in Components:**
+
+```typescript
+"use client";
+import { useQuery } from "@tanstack/react-query";
+import { getProfileQueryOptions } from "@/queries/profile.query";
+
+export function UserProfile() {
+  const { data: profile, isLoading, error } = useQuery(getProfileQueryOptions());
+
+  if (isLoading) return <div>Loading...</div>;
+  if (error) return <div>Error loading profile</div>;
+
+  return <div>{profile?.email}</div>;
+}
+```
+
+### Context Providers
+
+Wrap your app with providers for global state:
 
 ```typescript
 // components/providers/user-profile-provider.tsx
 "use client";
 
-import { createContext, PropsWithChildren } from "react";
+import { createContext, useContext } from "react";
 import { useQuery } from "@tanstack/react-query";
-import type { SelectProfile } from "@/types/drizzle.types";
 import { getProfileQueryOptions } from "@/queries/profile.query";
 
-type UserProfileContextType = {
-  profile: SelectProfile | null;
-  isLoading: boolean;
-  error: Error | null;
-};
+const UserProfileContext = createContext(null);
 
-export const UserProfileContext = createContext<UserProfileContextType | null>(null);
-
-export const UserProfileProvider = ({ children }: PropsWithChildren) => {
-  const { data, isLoading, error } = useQuery(getProfileQueryOptions());
+export function UserProfileProvider({ children }) {
+  const { data: profile } = useQuery(getProfileQueryOptions());
 
   return (
-    <UserProfileContext.Provider value={{ profile: data ?? null, isLoading, error }}>
+    <UserProfileContext.Provider value={{ profile }}>
       {children}
     </UserProfileContext.Provider>
   );
-};
-```
+}
 
-**Create a Custom Hook:**
-
-```typescript
-// hooks/use-user-profile.ts
-import { useContext } from "react";
-import { UserProfileContext } from "@/components/providers/user-profile-provider";
-
-export const useUserProfile = () => {
+export function useUserProfile() {
   const context = useContext(UserProfileContext);
-
   if (!context) {
-    throw new Error("`useUserProfile` must be used within a UserProfileProvider");
+    throw new Error("useUserProfile must be used within UserProfileProvider");
   }
-
   return context;
-};
-```
-
-**Usage in Components:**
-
-```typescript
-"use client";
-
-import { useUserProfile } from "@/hooks/use-user-profile";
-
-export function UserProfile() {
-  const { profile, isLoading, error } = useUserProfile();
-
-  if (isLoading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error.message}</div>;
-
-  return (
-    <div>
-      <h1>{profile?.name}</h1>
-    </div>
-  );
 }
 ```
 
-### Why This Pattern?
+### Drizzle ORM
 
-- **Simplicity**: No extra libraries, just React Context and TanStack Query
-- **Type Safety**: Full TypeScript support with proper type inference
-- **Performance**: TanStack Query handles caching and deduplication automatically
-- **Scoped State**: Each provider instance is independent for fine-grained control
+Type-safe database operations:
 
-### Setting Up New Providers
-
-1. Create a Context with the necessary state type
-2. Create a Provider component that manages the data
-3. Create a custom hook for accessing the context
-
-## Using SEO helper function
-
-I've created a helper function to make building SEO-friendly pages effortless.
-
-### Using it in the root layout
-
-Set your global defaults once in the App Router layout. All pages will inherit this metadata.
-
-```typescript
-// app/layout.tsx
-import type { Metadata } from "next";
-import { buildMetadata } from "@/lib/seo";
-
-export const metadata: Metadata = buildMetadata();
-```
-
-### Using it in Per-page metadata
-
-Static page:
-
-```typescript
-// app/pricing/page.tsx
-import type { Metadata } from "next";
-import { buildMetadata } from "@/lib/seo";
-
-export const metadata: Metadata = buildMetadata({
-  title: "Pricing",
-  description: "Simple, transparent pricing.",
-  path: "/pricing",
-});
-```
-
-Dynamic route (when you need params or data):
-
-```typescript
-// app/blog/[slug]/page.tsx
-import type { Metadata } from "next";
-import { buildMetadata } from "@/lib/seo";
-
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}): Promise<Metadata> {
-  const { slug } = await params;
-
-  return buildMetadata({
-    title: `Post: ${slug}`,
-    description: `Read ${slug}`,
-    path: `/blog/${slug}`,
-    image: "/og.png",
-  });
-}
-```
-
-## Using Drizzle ORM
-
-**Drizzle ORM** provides a type-safe, SQL-first ORM for database operations. It includes relation support, migrations, and a studio for database management.
-
-**Schema Definition:**
+**Define Schema:**
 
 ```typescript
 // drizzle/schemas/profiles/profile.schema.ts
-import { pgTable, varchar } from "drizzle-orm/pg-core";
+import { pgTable, varchar, uuid } from "drizzle-orm/pg-core";
 import { baseColumns } from "../base";
 
 export const profiles = pgTable("profiles", {
-  ...baseColumns, // includes id, createdAt, updatedAt
+  ...baseColumns,
   email: varchar("email", { length: 255 }).notNull(),
   name: varchar("name", { length: 100 }).notNull(),
   imageUrl: varchar("image_url", { length: 255 }),
 });
+```
+
+**Query Database:**
+
+```typescript
+import { db } from "@/lib/drizzle/db";
+import { profiles } from "@/drizzle/schemas";
+import { eq } from "drizzle-orm";
+
+const user = await db.select().from(profiles).where(eq(profiles.id, userId)).limit(1);
 ```
 
 **Database Commands:**
@@ -262,133 +340,194 @@ export const profiles = pgTable("profiles", {
 pnpm db:push
 
 # Generate migrations
-pnpm db:migrate <migration_name>
+pnpm db:migrate <name>
 
-# Apply pending migrations
+# Apply migrations
 pnpm db:update
 
-# Open Drizzle Studio (visual DB editor)
+# Open Drizzle Studio (visual editor)
 pnpm db:studio
 ```
 
-For relationships, foreign keys, and advanced queries, refer to the [Drizzle Documentation](https://orm.drizzle.team/).
+## 💌 Email & Notifications
 
-## Using TanStack Queries
+### Resend Integration
 
-**TanStack Query** handles data fetching, caching, and synchronization with query keys and options patterns.
+Send transactional emails:
 
-**Setup Query Options:**
-
-```typescript
-const EXAMPLE = "exampleData";
-
-const exampleKey = {
-  all: [EXAMPLE],
-  lists: (searchParams?: SearchQueries) => {
-    const keys = [...exampleKey.all, "list"];
-    if (searchParams) return [...keys, searchParams];
-    return keys;
-  },
-  detail: (id: string) => [...exampleKey.all, "detail", id],
-};
-
-export const getExampleOptions = (searchParams?: SearchQueries) =>
-  queryOptions({
-    queryKey: exampleKey.lists(searchParams),
-    queryFn: () => ExampleService.list(searchParams),
-  });
-```
-
-**Using in Components:**
-
-```typescript
-import { useQuery } from "@tanstack/react-query";
-
-export function ExampleList() {
-  const { data, isLoading, isError } = useQuery(getExampleOptions());
-
-  if (isLoading) return <div>Loading...</div>;
-  if (isError) return <div>Error loading data</div>;
-
-  return (
-    <ul>
-      {data?.map((item) => (
-        <li key={item.id}>{item.name}</li>
-      ))}
-    </ul>
-  );
-}
-```
-
-This pattern ensures queries are cached, deduped across components, and easily refetchable. See [TanStack Query Documentation](https://tanstack.com/query/latest) for advanced features.
-
-## Using Resend API
-
-**Resend** is integrated for transactional emails. Configure it with environment variables and use the API endpoint:
-
-**Environment Setup:**
-
-```bash
-RESEND_API_KEY=your_api_key_here
-RESEND_EMAIL_FROM=noreply@yourdomain.com
-```
-
-**API Route:**
+**API Endpoint:**
 
 ```typescript
 // app/api/send/route.ts
-import { NextResponse } from "next/server";
-import { Resend } from "resend";
+export async function POST(request: NextRequest) {
+  const { user, error } = await requireAuth();
+  if (error) return error;
 
-export const runtime = "nodejs"; // Required for Resend
+  const { to, subject, html } = await request.json();
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+  const result = await resend.emails.send({
+    from: process.env.RESEND_EMAIL_FROM,
+    to,
+    subject,
+    html,
+  });
 
-export async function POST(req: Request) {
-  try {
-    const { to, subject, html } = await req.json();
-
-    if (!to || !subject || !html) {
-      return NextResponse.json(
-        { success: false, error: "Missing to/subject/html" },
-        { status: 400 }
-      );
-    }
-
-    const result = await resend.emails.send({
-      from: process.env.RESEND_EMAIL_FROM!,
-      to,
-      subject,
-      html,
-    });
-
-    return NextResponse.json({ success: true, data: result }, { status: 200 });
-  } catch (error) {
-    console.error("Error sending email:", error);
-    return NextResponse.json({ success: false, error: "Something went wrong" }, { status: 500 });
-  }
+  return apiResponse({
+    data: result,
+    status: HttpStatus.OK,
+  });
 }
 ```
 
 **Usage in Components:**
 
 ```typescript
-async function sendWelcomeEmail(email: string, name: string) {
-  const response = await fetch("/api/send", {
-    method: "POST",
-    body: JSON.stringify({
-      to: email,
-      subject: "Welcome!",
-      html: `<h1>Welcome ${name}</h1><p>Thanks for signing up!</p>`,
-    }),
+const response = await fetch("/api/send", {
+  method: "POST",
+  body: JSON.stringify({
+    to: user.email,
+    subject: "Welcome!",
+    html: "<h1>Welcome to our app!</h1>",
+  }),
+});
+```
+
+### Toast Notifications
+
+Display feedback using `sonner`:
+
+```typescript
+import { toast } from "sonner";
+
+// Success
+toast.success("Profile updated!", {
+  description: "Your changes have been saved.",
+});
+
+// Error
+toast.error("Something went wrong", {
+  description: "Please try again.",
+});
+
+// Info
+toast.info("Please log in", {
+  description: "You need to be authenticated.",
+});
+```
+
+## 🎯 SEO & Metadata
+
+Use the `buildMetadata()` helper for consistent SEO:
+
+**Global Defaults** (root layout):
+
+```typescript
+// app/layout.tsx
+import { buildMetadata } from "@/lib/seo";
+
+export const metadata: Metadata = buildMetadata();
+```
+
+**Per-Page Metadata:**
+
+```typescript
+// app/blog/[slug]/page.tsx
+import { buildMetadata } from "@/lib/seo";
+
+export async function generateMetadata({ params }) {
+  const { slug } = await params;
+
+  return buildMetadata({
+    title: `Blog: ${slug}`,
+    description: `Read ${slug}`,
+    path: `/blog/${slug}`,
+    image: "/og.png",
   });
-
-  if (!response.ok) {
-    throw new Error("Failed to send email");
-  }
-
-  return response.json();
 }
 ```
 
-For email templates, see [Resend Documentation](https://resend.com/docs).
+Automatically generates Open Graph, Twitter, canonical URLs, and robots metadata.
+
+## ✅ Code Quality
+
+### Linting & Formatting
+
+```bash
+# Run ESLint
+pnpm lint
+
+# Fix linting issues
+pnpm lint:fix
+
+# Format code
+pnpm format
+```
+
+### Testing
+
+```bash
+# Unit tests (Vitest)
+pnpm test:unit
+
+# E2E tests (Playwright)
+pnpm test:e2e
+
+# Watch mode
+pnpm test:e2e:ui
+```
+
+### Building
+
+```bash
+# Build for production
+pnpm build
+
+# Start production server
+pnpm start
+```
+
+## 🏗️ Architecture Patterns
+
+This template uses standardized patterns for common tasks:
+
+| Pattern               | Purpose                       | Link                                         |
+| --------------------- | ----------------------------- | -------------------------------------------- |
+| **Auth Guard**        | Protect API routes            | [Read more →](./patterns/auth-guard.md)      |
+| **Form Validation**   | Type-safe forms with Zod      | [Read more →](./patterns/form-validation.md) |
+| **API Response**      | Consistent endpoint responses | [Read more →](./patterns/api-response.md)    |
+| **Route Definitions** | Centralized URL constants     | [Read more →](./patterns/routes.md)          |
+| **Query Keys**        | React Query cache management  | [Read more →](./patterns/query-keys.md)      |
+| **HTTP Status Codes** | Centralized status handling   | [Read more →](./patterns/http-status.md)     |
+
+For deep dives into each pattern, see [Architecture Patterns →](./patterns/)
+
+## 🚀 Next Steps
+
+### Customize the Template
+
+1. **Update environment variables** - Set up your Supabase project
+2. **Modify sidebar items** - Edit `constants/app-sidebar-items.constant.ts`
+3. **Update SEO constants** - Edit `constants/seo.constant.ts` with your domain
+4. **Create your first page** - Add a new route in `app/(protected)/`
+5. **Build your database schema** - Define tables in `drizzle/schemas/`
+
+### Explore Examples
+
+- **Auth flow:** Check `app/(auth)/login/page.client.tsx`
+- **Protected API:** See `app/api/users/me/route.ts`
+- **Data fetching:** Look at `queries/profile.query.ts` and `services/profile.service.ts`
+- **Form handling:** Study `app/(auth)/register/page.client.tsx`
+
+### Learn More
+
+- [Architecture Patterns →](./patterns/index.md) - Deep dive into design patterns
+- [AGENTS.md](/AGENTS.md) - Comprehensive technical documentation
+- [Next.js Documentation](https://nextjs.org/docs)
+- [Supabase Documentation](https://supabase.com/docs)
+- [Drizzle Documentation](https://orm.drizzle.team/)
+
+## 💬 Support & Contributions
+
+Found a bug or have a suggestion? Feel free to open an issue or contribute!
+
+Happy building! 🚀
