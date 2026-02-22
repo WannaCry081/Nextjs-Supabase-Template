@@ -83,11 +83,6 @@ export function getStatusText(status: number): string {
 }
 ```
 
-return STATUS_TEXT_MAP[status] || "Unknown Status";
-}
-
-````
-
 The `getStatusText()` function is used internally by `apiResponse()` to include proper HTTP status names in responses.
 
 ## Error Messages
@@ -128,7 +123,7 @@ export const EMAIL_ERRORS = {
   NOT_CONFIGURED: "Email service is not configured",
   SEND_FAILED: "Failed to send email",
 } as const;
-````
+```
 
 ## Usage in API Routes
 
