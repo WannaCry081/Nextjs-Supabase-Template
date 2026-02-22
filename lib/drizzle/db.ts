@@ -1,22 +1,36 @@
 import postgres from "postgres";
 import { drizzle } from "drizzle-orm/postgres-js";
 
-let db: ReturnType<typeof drizzle> | null = null;
+/**
+ * Database connection singleton
+ * Uses Postgres.js with Supabase Transaction pooling mode
+ */
+let dbInstance: ReturnType<typeof drizzle> | null = null;
 
-export const getDb = () => {
-  if (db) {
-    return db;
+/**
+ * Get or create database connection
+ * @returns Drizzle database instance
+ */
+export function getDb() {
+  if (dbInstance) {
+    return dbInstance;
   }
 
-  const connectionString = process.env.DATABASE_URL;
+  // Disable prefetch as it is not supported for "Transaction" pool mode
+  const client = postgres(process.env.DATABASE_URL!, {
+    prepare: false,
+    max: 10, // Maximum pool size
+    idle_timeout: 20, // Close idle connections after 20 seconds
+    connect_timeout: 10, // Connection timeout in seconds
+  });
 
-  if (!connectionString) {
-    throw new Error("DATABASE_URL environment variable is not set");
-  }
+  dbInstance = drizzle(client);
 
-  // Disable prefetch as it is not supported for "Transaction" pool mode.
-  const client = postgres(connectionString, { prepare: false });
-  db = drizzle(client);
+  return dbInstance;
+}
 
-  return db;
-};
+/**
+ * Direct database export for convenience
+ * Use this for standard queries
+ */
+export const db = getDb();

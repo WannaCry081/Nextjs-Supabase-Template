@@ -1,12 +1,10 @@
 import { type NextRequest } from "next/server";
 
-// Utils
 import { updateSession } from "@/lib/supabase/middleware";
-
-const PROTECTED_ROUTES: string[] = ["/dashboard/*"];
+import { PROTECTED_ROUTE_PATTERNS } from "@/constants/routes.constant";
 
 export async function proxy(request: NextRequest) {
-  return await updateSession(request, PROTECTED_ROUTES);
+  return await updateSession(request, PROTECTED_ROUTE_PATTERNS);
 }
 
 export const config = {
@@ -16,8 +14,8 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
-     * Feel free to modify this pattern to include more paths.
+     * - api/health (health check endpoint)
      */
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|api/health|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };

@@ -1,38 +1,30 @@
 import { eq } from "drizzle-orm";
-import { NextResponse } from "next/server";
 
-import { getDb } from "@/lib/drizzle/db";
 import { profiles } from "@/drizzle/schemas";
 
-import { getSupabaseServer } from "@/lib/supabase/server";
+import { db } from "@/lib/drizzle/db";
+import { apiResponse } from "@/lib/api-response";
+
+import { requireAuth } from "@/common/guards/auth.guard";
+
+import { HttpStatus } from "@/constants/http-status.constant";
 
 export async function GET() {
-  const supabase = await getSupabaseServer();
+  try {
+    const { user, error } = await requireAuth();
+    if (error) return error;
 
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser();
+    const response = await db.select().from(profiles).where(eq(profiles.id, user!.id)).limit(1);
 
-  if (error || !user) {
-    return NextResponse.json(
-      {
-        data: null,
-        error: error,
-      },
-      {
-        status: 401,
-      }
-    );
-  }
-
-  const db = getDb();
-  const response = await db.select().from(profiles).where(eq(profiles.id, user.id)).limit(1);
-
-  return NextResponse.json(
-    {
+    return apiResponse({
       data: response[0] ?? null,
-    },
-    { status: 200 }
-  );
+      status: HttpStatus.OK,
+    });
+  } catch (error) {
+    console.error("Error fetching user profile:", error);
+    return apiResponse({
+      data: "Failed to fetch user profile",
+      status: HttpStatus.INTERNAL_SERVER_ERROR,
+    });
+  }
 }

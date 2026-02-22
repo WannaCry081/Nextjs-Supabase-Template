@@ -1,12 +1,12 @@
 import type { SelectProfile } from "@/types/drizzle.types";
+import { API_ROUTES } from "@/constants/routes.constant";
+import { API_HEADERS } from "@/constants/api.constant";
 
 export const profileService = {
   me: async (): Promise<SelectProfile | null> => {
-    const response = await fetch("/api/users/me", {
+    const response = await fetch(API_ROUTES.USERS_ME, {
       method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: API_HEADERS,
     });
 
     if (response.status === 401) return null;

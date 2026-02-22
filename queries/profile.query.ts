@@ -1,17 +1,15 @@
 import { queryOptions } from "@tanstack/react-query";
 
-// Services
 import { profileService } from "@/services/profile.service";
 
-const PROFILE = "profile";
+import { queryKeys } from "@/lib/query/query-keys";
 
-const profileQueryKey = {
-  all: [PROFILE],
-  me: () => [...profileQueryKey.all, "me"],
-};
-
+/**
+ * Profile query options
+ * Fetches the current user's profile
+ */
 export const getProfileQueryOptions = () =>
   queryOptions({
-    queryKey: profileQueryKey.me(),
+    queryKey: queryKeys.profile.me(),
     queryFn: () => profileService.me(),
   });

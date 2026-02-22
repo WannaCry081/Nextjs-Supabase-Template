@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useState } from "react";
 import { ArrowRight, Menu, X } from "lucide-react";
 
-// Components
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 

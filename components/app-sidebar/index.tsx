@@ -3,7 +3,6 @@
 import * as React from "react";
 import { Command } from "lucide-react";
 
-// Components
 import {
   Sidebar,
   SidebarContent,
@@ -18,13 +17,10 @@ import { NavUser } from "@/components/app-sidebar/nav-user";
 
 import { NavPrimary } from "./nav-primary";
 
-// Hooks
 import { useUserProfile } from "@/hooks/use-user-profile";
 
-// Contants
 import { APP_SIDEBAR_ITEMS } from "@/constants/app-sidebar-items.constant";
 
-// Utils
 import { getSupabaseClient } from "@/lib/supabase/client";
 import { useRouter } from "nextjs-toploader/app";
 import { NavSecondary } from "./nav-secondary";

@@ -1,6 +1,13 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { DEFAULT_UNAUTH_REDIRECT } from "@/constants/routes.constant";
 
+/**
+ * Updates session and handles route protection
+ * @param request - Next.js request object
+ * @param protectedRoutes - Array of protected route patterns
+ * @returns Next.js response with updated cookies
+ */
 export async function updateSession(request: NextRequest, protectedRoutes: string[]) {
   const response = NextResponse.next({ request });
   const supabase = createServerClient(
@@ -32,7 +39,7 @@ export async function updateSession(request: NextRequest, protectedRoutes: strin
 
   if (isProtected && !user) {
     const url = request.nextUrl.clone();
-    url.pathname = "/login";
+    url.pathname = DEFAULT_UNAUTH_REDIRECT;
     url.searchParams.set("redirect", pathname);
     return NextResponse.redirect(url);
   }

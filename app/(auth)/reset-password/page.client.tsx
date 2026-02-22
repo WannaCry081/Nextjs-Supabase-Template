@@ -1,38 +1,33 @@
 "use client";
 
-import { z } from "zod";
 import Link from "next/link";
 import { toast } from "sonner";
 import { Activity, useTransition } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-// Components
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
-
-// Utils
-import { getSupabaseClient } from "@/lib/supabase/client";
 import { PasswordInput } from "@/components/shared/password-input";
 
-const formSchema = z.object({
-  password: z.string().min(6, "Password must be at least 6 characters long"),
-});
+import { getSupabaseClient } from "@/lib/supabase/client";
+
+import { resetPasswordSchema, type ResetPasswordFormValues } from "@/common/schemas/auth.schema";
 
 export const PageClient = () => {
   const supabase = getSupabaseClient();
 
   const [isPending, startTransition] = useTransition();
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<ResetPasswordFormValues>({
+    resolver: zodResolver(resetPasswordSchema),
     defaultValues: {
       password: "",
     },
   });
 
-  const onFormSubmit = (values: z.infer<typeof formSchema>) => {
+  const onFormSubmit = (values: ResetPasswordFormValues) => {
     startTransition(async () => {
       try {
         const { error } = await supabase.auth.updateUser({

@@ -1,52 +1,66 @@
-import { NextResponse } from "next/server";
+import { z } from "zod";
 import { Resend } from "resend";
 
-import { getSupabaseServer } from "@/lib/supabase/server";
+import { apiResponse } from "@/lib/api-response";
 
-export const runtime = "nodejs"; // important: keep this on Node.js runtime
+import { requireAuth } from "@/common/guards/auth.guard";
+
+import { HttpStatus } from "@/constants/http-status.constant";
+import { API_ERRORS, EMAIL_ERRORS } from "@/constants/http-error-messages.constant";
+
+const RESEND_API_KEY = process.env.RESEND_API_KEY;
+const RESEND_EMAIL_FROM = process.env.RESEND_EMAIL_FROM;
+
+export const runtime = "nodejs";
+
+const emailSchema = z.object({
+  to: z.email(),
+  subject: z.string().min(1),
+  html: z.string().min(1),
+});
 
 export async function POST(req: Request) {
   try {
-    const supabase = await getSupabaseServer();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const { error } = await requireAuth();
+    if (error) return error;
 
-    if (!user) {
-      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    const body = await req.json();
+    const validation = emailSchema.safeParse(body);
+
+    if (!validation.success) {
+      return apiResponse({
+        data: API_ERRORS.MISSING_FIELDS,
+        status: HttpStatus.BAD_REQUEST,
+      });
     }
 
-    const { to, subject, html } = await req.json();
+    const { to, subject, html } = validation.data;
 
-    if (!to || !subject || !html) {
-      return NextResponse.json(
-        { success: false, error: "Missing to/subject/html" },
-        { status: 400 }
-      );
+    if (!RESEND_API_KEY || !RESEND_EMAIL_FROM) {
+      return apiResponse({
+        data: EMAIL_ERRORS.NOT_CONFIGURED,
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+      });
     }
 
-    const resendApiKey = process.env.RESEND_API_KEY;
-    const resendEmailFrom = process.env.RESEND_EMAIL_FROM;
-
-    if (!resendApiKey || !resendEmailFrom) {
-      return NextResponse.json(
-        { success: false, error: "Email service is not configured" },
-        { status: 500 }
-      );
-    }
-
-    const resend = new Resend(resendApiKey);
+    const resend = new Resend(RESEND_API_KEY);
     const result = await resend.emails.send({
-      from: resendEmailFrom,
+      from: RESEND_EMAIL_FROM,
       to,
       subject,
       html,
     });
 
-    return NextResponse.json({ success: true, data: result }, { status: 200 });
+    return apiResponse({
+      data: result,
+      status: HttpStatus.OK,
+    });
   } catch (error) {
     console.error("Error sending email:", error);
 
-    return NextResponse.json({ success: false, error: "Something went wrong" }, { status: 500 });
+    return apiResponse({
+      data: EMAIL_ERRORS.SEND_FAILED,
+      status: HttpStatus.INTERNAL_SERVER_ERROR,
+    });
   }
 }

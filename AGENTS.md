@@ -1,98 +1,107 @@
 # AGENTS.md
 
-This file is the canonical contributor/agent guide for `nextjs-supabase-template`.
+Developer guide for working with your cloned Next.js + Supabase project. This guide outlines the project structure, conventions, patterns, and workflows to help you understand and extend the starter template.
 
 ## Project Overview
 
-### Purpose
+### What You Have
 
-- This repository is a full-stack starter built on Next.js + Supabase + Drizzle ORM, with a separate VitePress docs site (`README.md`, `docs/index.md`, `docs/overview.md`).
-- It includes auth flows, protected routes, a starter dashboard shell, API routes, and CI for lint/unit/e2e/build (`app/(auth)/*`, `app/(protected)/*`, `app/api/*`, `.github/workflows/*`).
+You've cloned a full-stack starter built on Next.js + Supabase + Drizzle ORM, with a separate VitePress docs site:
 
-### Runtime Architecture
+- **Included features:** Authentication flows, protected routes, dashboard shell, API routes, and CI pipeline for lint/unit/e2e/build
+- **Key directories:** `app/(auth)/*`, `app/(protected)/*`, `app/api/*`, `.github/workflows/*`
+- **Documentation:** `README.md`, `docs/index.md`, `docs/overview.md`
 
-- App Router with route groups:
-  - Public marketing page: `app/(public)/page.tsx`, `app/(public)/page.client.tsx`
-  - Auth pages: `app/(auth)/*`
-  - Protected app shell: `app/(protected)/layout.tsx`, `app/(protected)/dashboard/page.client.tsx`
-- Root providers:
-  - Query client: `components/providers/react-query-provider.tsx`
-  - UI providers (toasts/tooltips/top-loader/theme): `components/providers/app-provider.tsx`, `components/providers/theme-provider.tsx`
-  - Registered in root layout: `app/layout.tsx`
-- Auth/session handling:
-  - Supabase browser/server clients: `lib/supabase/client.ts`, `lib/supabase/server.ts`
-  - Route protection and session refresh in proxy middleware: `proxy.ts`, `lib/supabase/middleware.ts`
-- Data layer:
-  - Drizzle connection: `lib/drizzle/db.ts`
-  - Schema + migrations: `drizzle/schemas/*`, `drizzle/migrations/*`
-  - API endpoint for current profile: `app/api/users/me/route.ts`
-  - Query/service pattern: `queries/profile.query.ts`, `services/profile.service.ts`
-- UI/system docs:
-  - App docs (VitePress): `docs/.vitepress/config.mts`, `docs/index.md`, `docs/overview.md`
+### Where Things Live
 
-### Key Modules
+The starter uses a specific folder structure. Understand these key locations:
 
-- `app/`: routes, layouts, API handlers.
-- `components/`: providers, sidebar shell, shared inputs, UI primitives.
-- `lib/`: Supabase helpers, Drizzle DB setup, SEO helper, utilities.
-- `services/` + `queries/`: API consumption and TanStack Query options.
-- `drizzle/`: schema and SQL migrations.
-- `tests/`: Vitest unit tests and Playwright e2e tests.
-- `.github/workflows/`: CI workflows.
+**App Router:**
+
+- Public pages: `app/(public)/*` — marketing landing page
+- Auth pages: `app/(auth)/*` — login, register, password reset flows
+- Protected pages: `app/(protected)/*` — dashboard and auth-gated content
+
+**Core Services:**
+
+- Supabase auth: `lib/supabase/client.ts`, `lib/supabase/server.ts`
+- Route protection: `proxy.ts`, `lib/supabase/middleware.ts`
+- Database layer: `lib/drizzle/db.ts`, `drizzle/schemas/*`, `drizzle/migrations/*`
+- Data fetching: `services/*` (API wrappers), `queries/*` (React Query options)
+- UI: `components/ui/*` (Shadcn/Radix), `components/shared/*` (reusable), `components/app-sidebar/*` (sidebar shell)
+- Global setup: `components/providers/*` (React Query, theme, auth context)
+
+### Folder Reference
+
+| Folder        | Purpose                                              |
+| ------------- | ---------------------------------------------------- |
+| `app/`        | Next.js App Router: pages, layouts, API endpoints    |
+| `components/` | React components (UI primitives, providers, sidebar) |
+| `lib/`        | Utilities, Supabase helpers, Drizzle setup           |
+| `services/`   | API client wrappers and fetch logic                  |
+| `queries/`    | React Query option factories                         |
+| `drizzle/`    | Database schema and migrations                       |
+| `tests/`      | Vitest unit tests and Playwright e2e tests           |
+| `types/`      | TypeScript types and interfaces                      |
+| `constants/`  | App-wide constants (routes, SEO, sidebar items)      |
+| `docs/`       | VitePress documentation site                         |
 
 ## Setup & Prerequisites
 
-### Tooling
+### Requirements
 
-- Node.js 20+ is required (`README.md`), and CI runs Node 20 (`.github/workflows/build.yaml`, `.github/workflows/vitest.yaml`, `.github/workflows/playwright.yml`).
-- `pnpm` is required (`package.json`, `README.md`).
-- Docker builds currently use Node 22 Alpine images (`Dockerfile`).
+To develop with this template, ensure you have:
 
-### Environment Variables
+- Node.js 20+ (CI runs Node 20; see `.github/workflows/`)
+- `pnpm` package manager (required in `package.json`)
+- Docker and Docker Compose (optional, for containerized deployment — see `Dockerfile`)
 
-Required variables are declared in `types/globals/env.d.ts` and template values in `.env.example`:
+### Environment Configuration
+
+Before running the project, configure these environment variables in `.env.local` or `.env`:
 
 ```bash
-DATABASE_URL
-NEXT_PUBLIC_SUPABASE_URL
-NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
-NEXT_PUBLIC_SITE_URL          # Used for SEO metadata (defaults to http://localhost:3000)
-RESEND_API_KEY
-RESEND_EMAIL_FROM
+DATABASE_URL                           # Supabase PostgreSQL connection string
+NEXT_PUBLIC_SUPABASE_URL               # Supabase project URL
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY   # Supabase publishable key
+NEXT_PUBLIC_SITE_URL                   # Your app URL (e.g., http://localhost:3000)
+RESEND_API_KEY                         # Email API key (Resend)
+RESEND_EMAIL_FROM                      # Sender email address
 ```
 
-Where they are used:
+Copy `.env.example` to `.env.local` and fill in your values. See:
 
-- DB config/runtime: `config/drizzle.config.ts`, `lib/drizzle/db.ts`
-- Supabase clients/middleware: `lib/supabase/client.ts`, `lib/supabase/server.ts`, `lib/supabase/middleware.ts`
-- SEO metadata: `constants/seo.constant.ts`
-- Email API route: `app/api/send/route.ts`
+- Database: `lib/drizzle/db.ts`, `config/drizzle.config.ts`
+- Auth: `lib/supabase/client.ts`, `lib/supabase/server.ts`
+- SEO: `constants/seo.constant.ts`
+- Email: `app/api/send/route.ts`
 
-### Local Development Setup
+### Quick Start
 
 ```bash
 pnpm install
-cp .env.example .env.local  # or .env
-pnpm dev
+cp .env.example .env.local
+# Fill in your environment variables
+pnpm start:development
 ```
 
-Optional parallel local stack:
+The app will start at `http://localhost:3000`.
+
+**Run everything in parallel** (app + docs + database studio):
 
 ```bash
 pnpm start:all
 ```
 
-This starts app + docs + Drizzle Studio concurrently (`package.json`).
+### Database Setup
 
-### Database Setup and Seeding
+The initial migration creates a `profiles` table. To set up your database:
 
-- Drizzle schema source: `drizzle/schemas/`.
-- Existing migration: `drizzle/migrations/0000_InitialCreate.sql` (creates `profiles` table).
-- There is no dedicated seed script in this repo. Use one of:
-  - manual SQL in Supabase/psql,
-  - Drizzle Studio (`pnpm db:studio`),
-  - custom script you add.
-- `/api/users/me` expects `profiles.id` to match Supabase user id (`app/api/users/me/route.ts`).
+1. Connect your Supabase PostgreSQL URL in `.env.local`
+2. Run `pnpm db:push` to apply migrations
+3. (Optional) Add seed data via SQL, Drizzle Studio, or a custom script
+
+Note: The `/api/users/me` endpoint expects a `profiles` record matching the Supabase user ID.
 
 ## Run/Test/Lint/Build Commands
 
@@ -100,12 +109,12 @@ Use these exact scripts (`package.json`):
 
 ```bash
 # App
-pnpm dev
+pnpm start:development
 pnpm build
 pnpm start
 
 # Docs
-pnpm docs:dev
+pnpm docs:development
 pnpm docs:build
 pnpm docs:preview
 
@@ -131,36 +140,42 @@ pnpm db:studio
 Notes:
 
 - Unit tests use Vitest + jsdom (`config/vitest.config.mts`, `tests/unit/utils.test.ts`).
-- E2E tests run Chromium/Firefox/WebKit and auto-start `pnpm dev` (`config/playwright.config.ts`, `tests/e2e/homepage.spec.ts`).
+- E2E tests run Chromium/Firefox/WebKit and auto-start `pnpm start:development` (`config/playwright.config.ts`, `tests/e2e/homepage.spec.ts`).
 
 ## CI/CD Overview
 
 ### Workflows
 
-- Build/Lint workflow: `.github/workflows/build.yaml`
-  - Triggers: push to `main|master|develop|dev` and all PRs.
-  - Steps: install -> `pnpm run lint` -> `pnpm run build`.
-  - Build step requires `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, and `DATABASE_URL` secrets.
-- Unit test workflow: `.github/workflows/vitest.yaml`
-  - Triggers: push/PR to `main|master|develop|dev`.
-  - Step: `pnpm test:unit`.
-- E2E workflow: `.github/workflows/playwright.yml`
-  - Triggers: push/PR to `main|master|develop|dev`.
-  - Steps: install -> `playwright install --with-deps` -> `pnpm test:e2e`.
-  - Uploads Playwright HTML report artifact.
+The template includes three GitHub Actions workflows:
+
+- **Build/Lint** (`.github/workflows/build.yaml`) — Runs linting and build checks on PRs and pushes to main branches
+- **Unit Tests** (`.github/workflows/vitest.yaml`) — Executes Vitest unit tests
+- **E2E Tests** (`.github/workflows/playwright.yml`) — Runs Playwright e2e tests in multiple browsers and uploads test reports
+
+These workflows require environment secrets for build steps:
+
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+- `DATABASE_URL`
 
 ### Release/Deployment Process
 
-- No deployment or release automation is currently defined under `.github/workflows/`.
-- Current process is CI validation only; production release is manual unless new workflows are added.
+No deployment automation is currently configured. The CI validates code quality only; release and deployment to production are manual unless you add new workflows.
 
 ## Coding Standards
+
+### Simplicity First (No Overengineering)
+
+- Prefer the simplest solution that works; avoid complex abstractions, patterns, or frameworks unless clearly necessary.
+- Choose small, readable changes over clever or generalized refactors.
+- If a change can be solved in one file or layer, do not split it across multiple layers without strong justification.
+- Add only the minimum needed error handling or configuration to meet requirements.
 
 ### Formatting and Lint
 
 - Prettier rules: semicolons, double quotes, trailing commas `es5`, width 100 (`.prettierrc`).
-- ESLint uses Next.js core-web-vitals + TypeScript + TanStack Query + Prettier (`eslint.config.mjs`).
-- `components/ui/**` and `drizzle/migrations/**` are excluded from linting/formatting (`eslint.config.mjs`, `.prettierignore`).
+- ESLint uses flat config with Next.js core-web-vitals, TypeScript, TanStack Query, JSON, and Markdown linting (`eslint.config.mjs`).
+- Excluded from linting: `.next/**`, `out/**`, `build/**`, `docs/.vitepress/**`, `components/ui/**`, `drizzle/migrations/**`.
 
 ### TypeScript and Imports
 
@@ -187,8 +202,8 @@ Notes:
 
 ### Branching
 
-- Active branches include `dev` and `main`; CI also targets `master` and `develop` (`git branch`, `.github/workflows/*`).
-- Recommended: branch from `dev` for feature work unless team policy changes.
+- Active branches include `dev` and `main`; CI also targets `master` and `develop` (see `.github/workflows/*`)
+- Recommended: branch from `dev` for feature work unless team policy changes
 
 ### Commit Messages
 
@@ -282,7 +297,7 @@ Notes:
 
 ### “Docs site won’t start”
 
-- Ensure `docs/.vitepress/config.mts` exists and run `pnpm docs:dev`.
+- Ensure `docs/.vitepress/config.mts` exists and run `pnpm docs:development`.
 - If stale cache issues occur, clear `docs/.vitepress/cache/`.
 
 ## Definition of Done Checklist
@@ -334,7 +349,7 @@ Notes:
 ## Project Structure
 
 ```text
-nextjs-supabase-template/
+project/
 ├── app/                           # Next.js App Router
 │   ├── (auth)/                    # Auth route group (no URL segment)
 │   │   ├── layout.tsx             # Centered card layout with branding
@@ -401,9 +416,16 @@ nextjs-supabase-template/
 │   ├── drizzle.config.ts
 │   ├── playwright.config.ts
 │   └── vitest.config.mts
+├── common/                        # Shared domain logic
+│   ├── guards/                    # Auth guards and validation
+│   └── schemas/                   # Zod validation schemas
 ├── constants/                     # App-wide constants
-│   ├── app-sidebar-items.constant.ts
-│   └── seo.constant.ts
+│   ├── api.constant.ts            # API endpoint definitions
+│   ├── app-sidebar-items.constant.ts # Sidebar navigation items
+│   ├── http-error-messages.constant.ts # Error messages mapping
+│   ├── http-status.constant.ts    # HTTP status codes
+│   ├── routes.constant.ts         # Route definitions
+│   └── seo.constant.ts            # SEO metadata constants
 ├── docs/                          # VitePress documentation site
 │   ├── .vitepress/config.mts
 │   ├── index.md
@@ -423,12 +445,15 @@ nextjs-supabase-template/
 │   └── use-user-profile.ts        # UserProfileContext consumer
 ├── lib/                           # Utilities and helpers
 │   ├── drizzle/db.ts              # Drizzle client (postgres.js driver)
-│   ├── query/get-query-client.ts  # TanStack QueryClient factory (SSR-aware)
+│   ├── query/
+│   │   ├── get-query-client.ts    # TanStack QueryClient factory (SSR-aware)
+│   │   └── query-keys.ts          # Hierarchical query key definitions
 │   ├── seo.ts                     # buildMetadata() helper
 │   ├── supabase/
 │   │   ├── client.ts              # Browser client (singleton)
 │   │   ├── server.ts              # Server client (async, cookie-based)
 │   │   └── middleware.ts          # Session refresh + route protection
+│   ├── api-response.ts            # Response formatting helper
 │   └── utils.ts                   # cn() — clsx + tailwind-merge
 ├── queries/                       # TanStack Query option factories
 │   └── profile.query.ts
@@ -934,36 +959,19 @@ docs/
 
 ### Configuration (`docs/.vitepress/config.mts`)
 
-```typescript
-import { defineConfig } from "vitepress";
+The VitePress configuration includes:
 
-export default defineConfig({
-  title: "NextJS Supabase Template",
-  description: "A production-ready Next.js + Supabase starter template",
-  themeConfig: {
-    nav: [
-      { text: "Docs", link: "/overview" },
-      { text: "Visit Page", link: "http://localhost:3000/" },
-    ],
-    sidebar: [
-      {
-        text: "Getting Started",
-        items: [{ text: "Overview", link: "/overview" }],
-      },
-    ],
-    socialLinks: [
-      { icon: "github", link: "https://github.com/wannacry081/Nextjs-Supabase-Template" },
-    ],
-  },
-});
-```
+- Navigation with dynamic app URL from `NEXT_PUBLIC_APP_URL` env var (defaults to `http://localhost:3000/`)
+- Getting Started section with overview guide
+- Architecture section with pattern documentation (API responses, auth guards, form validation, routes, query keys, HTTP status)
+- GitHub social links
 
 ### Running the Docs Site
 
 ```bash
-pnpm docs:dev       # Start VitePress dev server
-pnpm docs:build     # Build for production
-pnpm docs:preview   # Preview production build
+pnpm docs:development   # Start VitePress dev server
+pnpm docs:build         # Build for production
+pnpm docs:preview       # Preview production build
 ```
 
 Or run everything concurrently:
@@ -974,32 +982,15 @@ pnpm start:all      # App + Docs + Drizzle Studio in parallel
 
 ### Adding New Documentation Pages
 
-1. Create a new `.md` file in `docs/` (e.g., `docs/authentication.md`)
-2. Add it to the sidebar in `docs/.vitepress/config.mts`:
-
-```typescript
-sidebar: [
-  {
-    text: "Getting Started",
-    items: [
-      { text: "Overview", link: "/overview" },
-      { text: "Authentication", link: "/authentication" },  // new
-    ],
-  },
-  {
-    text: "Guides",     // new section
-    items: [
-      { text: "Database", link: "/database" },
-    ],
-  },
-],
-```
-
+1. Create a new `.md` file in `docs/` (e.g., `docs/database.md`) or in `docs/patterns/` for architecture patterns
+2. Add it to the sidebar in `docs/.vitepress/config.mts` under the appropriate section
 3. Use VitePress markdown features:
    - Frontmatter for page metadata
    - Code blocks with syntax highlighting
    - Custom containers (`::: tip`, `::: warning`, `::: danger`)
    - Vue components in markdown (if needed)
+
+Existing pattern pages are located in `docs/patterns/` and cover API responses, auth guards, form validation, routes, query keys, and HTTP status codes.
 
 ### Documentation Standards
 
@@ -1285,8 +1276,7 @@ export default async function Page() {
 
 ## Assumptions and Open Questions
 
-- Assumption: `dev` is the primary integration branch because it exists locally and CI targets it.
-- Assumption: Manual release/deploy is acceptable because no deployment workflows exist in `.github/workflows/`.
-- Question: Should signup create a `profiles` row automatically (trigger or API), since `/api/users/me` reads from `profiles` by auth user id?
-- Question: Should branch triggers be simplified to one canonical primary branch set (`main` + `dev`)?
-- Question: `docs/overview.md` references `middleware.ts`, but runtime guard lives in `proxy.ts` (Next.js 16 convention); should docs be updated?
+- Assumption: `dev` is the primary integration branch; adjust based on your team's workflow
+- Assumption: Manual release/deploy process is acceptable; add CI/CD automation as needed
+- Consideration: Signup flow may need `profiles` table seeding to work with `/api/users/me` endpoint
+- Consideration: Review branch protection rules to align with your team's release process
