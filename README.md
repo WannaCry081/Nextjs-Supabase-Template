@@ -18,14 +18,6 @@ A full-stack starter template with **Next.js 16**, **Supabase** authentication &
 
 ## 🚀 Installation
 
-### Prerequisites
-
-- **Node.js** 20+ ([Download](https://nodejs.org/))
-- **pnpm** 9.12.2+ (`npm install -g pnpm`)
-- **Supabase Account** ([Sign up free](https://supabase.com))
-
-### Setup (3 Steps)
-
 #### 1. Clone & Install
 
 ```bash
@@ -135,11 +127,11 @@ Complete structure and patterns documented in **[AGENTS.md](./AGENTS.md)**.
 ### Schema Management
 
 ```bash
-# Generate migration
+# Generate drizzle migration
 pnpm db:migrate AddMyColumn
 
-# Review SQL
-cat drizzle/migrations/0001_AddMyColumn.sql
+# Updates a record in the database using Drizzle ORM.
+pnpm db:update
 
 # Apply changes
 pnpm db:push
