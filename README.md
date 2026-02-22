@@ -29,7 +29,7 @@ A full-stack starter template with **Next.js 16**, **Supabase** authentication &
 #### 1. Clone & Install
 
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/WannaCry081/Nextjs-Supabase-Template.git
 cd nextjs-supabase-template
 pnpm install
 ```
