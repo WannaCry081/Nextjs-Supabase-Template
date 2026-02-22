@@ -18,6 +18,14 @@ A full-stack starter template with **Next.js 16**, **Supabase** authentication &
 
 ## 🚀 Installation
 
+### Prerequisites
+
+- **Node.js** 20+ ([Download](https://nodejs.org/))
+- **pnpm** 9.12.2+ (`npm install -g pnpm`)
+- **Supabase Account** ([Sign up free](https://supabase.com))
+
+### Setup (3 Steps)
+
 #### 1. Clone & Install
 
 ```bash
@@ -88,7 +96,7 @@ pnpm docs:build             # Build docs
 
 ## 📁 Project Structure
 
-```
+```text
 app/                    # Next.js pages & API routes
   (auth)/              # Login, register, password reset
   (protected)/         # Dashboard (auth-gated)

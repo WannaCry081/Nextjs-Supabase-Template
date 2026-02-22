@@ -966,15 +966,13 @@ The VitePress configuration includes:
 - Architecture section with pattern documentation (API responses, auth guards, form validation, routes, query keys, HTTP status)
 - GitHub social links
 
-````
-
 ### Running the Docs Site
 
 ```bash
 pnpm docs:development   # Start VitePress dev server
 pnpm docs:build         # Build for production
 pnpm docs:preview       # Preview production build
-````
+```
 
 Or run everything concurrently:
 

@@ -25,9 +25,9 @@ Closes #(issue number)
 
 ### How to Test
 
-[ ] Step 1: Navigate to the page
-[ ] Step 2: Click on the button
-[ ] Step 3: Verify if the changes are reflected
+- [ ] Step 1: Navigate to the page
+- [ ] Step 2: Click on the button
+- [ ] Step 3: Verify if the changes are reflected
 
 ## ✅ Checklist
 

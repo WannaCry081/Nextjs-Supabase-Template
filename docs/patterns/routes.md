@@ -119,16 +119,21 @@ export function LoginButton() {
 - [API Response →](./api-response.md) - Response formatting
 - [Auth Guard →](./auth-guard.md) - Authentication verification
 
-export function LoginButton() {
-return (
+### In Components
 
-<Link href={AUTH_ROUTES.LOGIN}>
+```typescript
+import { AUTH_ROUTES } from "@/constants/routes.constant";
+import Link from "next/link";
+
+export function LoginButton() {
+  return (
+    <Link href={AUTH_ROUTES.LOGIN}>
 Sign In
 </Link>
 );
 }
 
-````
+```
 
 ## Usage in Client Redirects
 
@@ -148,7 +153,7 @@ export const PageClient = () => {
 
   // ...
 };
-````
+```
 
 ## Adding New Routes
 

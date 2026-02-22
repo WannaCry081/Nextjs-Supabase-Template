@@ -264,7 +264,7 @@ return apiResponse({
 
 These patterns work together in a cohesive system:
 
-```
+```text
 ┌─────────────────────────────────────────┐
 │        User Makes Request               │
 └──────────────────┬──────────────────────┘
@@ -319,4 +319,4 @@ These patterns work together in a cohesive system:
 ## See Also
 
 - [Overview](../overview.md) - Getting started guide
-- [AGENTS.md](/AGENTS.md) - Comprehensive architectural documentation
+- [AGENTS.md](../../AGENTS.md) - Comprehensive architectural documentation

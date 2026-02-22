@@ -82,7 +82,7 @@ Each group has its own layout, styling, and logic.
 
 ### Key Directories
 
-```
+```text
 app/                 # Next.js App Router
 ├── (auth)/         # Auth pages & forms
 ├── (protected)/    # Dashboard & protected routes
@@ -521,7 +521,7 @@ For deep dives into each pattern, see [Architecture Patterns →](./patterns/)
 ### Learn More
 
 - [Architecture Patterns →](./patterns/index.md) - Deep dive into design patterns
-- [AGENTS.md](/AGENTS.md) - Comprehensive technical documentation
+- [AGENTS.md](../AGENTS.md) - Comprehensive technical documentation
 - [Next.js Documentation](https://nextjs.org/docs)
 - [Supabase Documentation](https://supabase.com/docs)
 - [Drizzle Documentation](https://orm.drizzle.team/)
