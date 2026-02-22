@@ -1,38 +1,33 @@
 "use client";
 
-import { z } from "zod";
 import Link from "next/link";
 import { toast } from "sonner";
 import { Activity, useTransition } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-// Components
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 
-// Utils
 import { getSupabaseClient } from "@/lib/supabase/client";
 
-const formSchema = z.object({
-  email: z.email("Please enter a valid email address"),
-});
+import { type ForgotPasswordFormValues, forgotPasswordSchema } from "@/common/schemas/auth.schema";
 
 export const PageClient = () => {
   const supabase = getSupabaseClient();
 
   const [isPending, startTransition] = useTransition();
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<ForgotPasswordFormValues>({
+    resolver: zodResolver(forgotPasswordSchema),
     defaultValues: {
       email: "",
     },
   });
 
-  const onFormSubmit = (values: z.infer<typeof formSchema>) => {
+  const onFormSubmit = (values: ForgotPasswordFormValues) => {
     startTransition(async () => {
       try {
         const { error } = await supabase.auth.resetPasswordForEmail(values.email, {
