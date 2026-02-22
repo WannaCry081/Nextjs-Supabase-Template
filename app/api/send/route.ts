@@ -1,13 +1,15 @@
 import { z } from "zod";
 import { Resend } from "resend";
 
-import { env } from "@/lib/env";
 import { apiResponse } from "@/lib/api-response";
 
 import { requireAuth } from "@/common/guards/auth.guard";
 
 import { HttpStatus } from "@/constants/http-status.constant";
 import { API_ERRORS, EMAIL_ERRORS } from "@/constants/http-error-messages.constant";
+
+const RESEND_API_KEY = process.env.RESEND_API_KEY;
+const RESEND_EMAIL_FROM = process.env.RESEND_EMAIL_FROM;
 
 export const runtime = "nodejs";
 
@@ -34,16 +36,16 @@ export async function POST(req: Request) {
 
     const { to, subject, html } = validation.data;
 
-    if (!env.RESEND_API_KEY || !env.RESEND_EMAIL_FROM) {
+    if (!RESEND_API_KEY || !RESEND_EMAIL_FROM) {
       return apiResponse({
         data: EMAIL_ERRORS.NOT_CONFIGURED,
         status: HttpStatus.INTERNAL_SERVER_ERROR,
       });
     }
 
-    const resend = new Resend(env.RESEND_API_KEY);
+    const resend = new Resend(RESEND_API_KEY);
     const result = await resend.emails.send({
-      from: env.RESEND_EMAIL_FROM,
+      from: RESEND_EMAIL_FROM,
       to,
       subject,
       html,
