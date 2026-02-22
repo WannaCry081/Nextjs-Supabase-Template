@@ -1,8 +1,6 @@
 import postgres from "postgres";
 import { drizzle } from "drizzle-orm/postgres-js";
 
-import { env } from "@/lib/env";
-
 /**
  * Database connection singleton
  * Uses Postgres.js with Supabase Transaction pooling mode
@@ -19,7 +17,7 @@ export function getDb() {
   }
 
   // Disable prefetch as it is not supported for "Transaction" pool mode
-  const client = postgres(env.DATABASE_URL, {
+  const client = postgres(process.env.DATABASE_URL!, {
     prepare: false,
     max: 10, // Maximum pool size
     idle_timeout: 20, // Close idle connections after 20 seconds
