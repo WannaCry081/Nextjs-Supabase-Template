@@ -1,11 +1,20 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+import { env } from "@/lib/env";
+import { DEFAULT_UNAUTH_REDIRECT } from "@/constants/routes.constant";
+
+/**
+ * Updates session and handles route protection
+ * @param request - Next.js request object
+ * @param protectedRoutes - Array of protected route patterns
+ * @returns Next.js response with updated cookies
+ */
 export async function updateSession(request: NextRequest, protectedRoutes: string[]) {
   const response = NextResponse.next({ request });
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
+    env.NEXT_PUBLIC_SUPABASE_URL,
+    env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
     {
       cookies: {
         getAll: () => request.cookies.getAll(),
@@ -32,7 +41,7 @@ export async function updateSession(request: NextRequest, protectedRoutes: strin
 
   if (isProtected && !user) {
     const url = request.nextUrl.clone();
-    url.pathname = "/login";
+    url.pathname = DEFAULT_UNAUTH_REDIRECT;
     url.searchParams.set("redirect", pathname);
     return NextResponse.redirect(url);
   }
