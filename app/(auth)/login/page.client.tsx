@@ -25,7 +25,7 @@ import { getSupabaseClient } from "@/lib/supabase/client";
 import { loginSchema, type LoginFormValues } from "@/common/schemas/auth.schema";
 
 import { AUTH_ROUTES, DEFAULT_AUTH_REDIRECT } from "@/constants/routes.constant";
-import { AUTH_ERRORS, AUTH_SUCCESS, API_ERRORS } from "@/constants/messages.constant";
+import { AUTH_ERRORS, AUTH_SUCCESS, API_ERRORS } from "@/constants/http-error-messages.constant";
 
 export const PageClient = () => {
   const router = useRouter();

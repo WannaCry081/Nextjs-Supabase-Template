@@ -7,7 +7,7 @@ import { apiResponse } from "@/lib/api-response";
 import { requireAuth } from "@/common/guards/auth.guard";
 
 import { HttpStatus } from "@/constants/http-status.constant";
-import { API_ERRORS, EMAIL_ERRORS } from "@/constants/messages.constant";
+import { API_ERRORS, EMAIL_ERRORS } from "@/constants/http-error-messages.constant";
 
 export const runtime = "nodejs";
 
