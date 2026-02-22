@@ -1,6 +1,7 @@
 import { queryOptions } from "@tanstack/react-query";
 
 import { profileService } from "@/services/profile.service";
+
 import { queryKeys } from "@/lib/query/query-keys";
 
 /**
