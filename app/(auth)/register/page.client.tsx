@@ -1,35 +1,31 @@
 "use client";
 
-import { z } from "zod";
 import Link from "next/link";
 import { toast } from "sonner";
 import { Activity, useTransition } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-// Components
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
-
-// Utils
-import { getSupabaseClient } from "@/lib/supabase/client";
 import { PasswordInput } from "@/components/shared/password-input";
 
-const formSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters long"),
-  email: z.email("Please enter a valid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters long"),
-});
+import { getSupabaseClient } from "@/lib/supabase/client";
+
+import { registerSchema, type RegisterFormValues } from "@/common/schemas/auth.schema";
+
+import { AUTH_ROUTES, DEFAULT_AUTH_REDIRECT } from "@/constants/routes.constant";
+import { AUTH_ERRORS, AUTH_SUCCESS, API_ERRORS } from "@/constants/messages.constant";
 
 export const PageClient = () => {
   const supabase = getSupabaseClient();
 
   const [isPending, startTransition] = useTransition();
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<RegisterFormValues>({
+    resolver: zodResolver(registerSchema),
     defaultValues: {
       name: "",
       email: "",
@@ -37,7 +33,7 @@ export const PageClient = () => {
     },
   });
 
-  const onFormSubmit = (values: z.infer<typeof formSchema>) => {
+  const onFormSubmit = (values: RegisterFormValues) => {
     startTransition(async () => {
       try {
         const { error } = await supabase.auth.signUp({
@@ -47,26 +43,26 @@ export const PageClient = () => {
             data: {
               name: values.name,
             },
-            emailRedirectTo: `${window.location.origin}/dashboard`,
+            emailRedirectTo: `${window.location.origin}${DEFAULT_AUTH_REDIRECT}`,
           },
         });
 
         if (error) {
-          toast.error("Registration failed", {
-            description: "Please check your credentials and try again.",
+          toast.error(AUTH_ERRORS.REGISTER_FAILED, {
+            description: AUTH_ERRORS.REGISTER_FAILED_DESC,
           });
           return;
         }
 
-        toast.success("Registration successful", {
-          description: "Please check your email to verify your account.",
+        toast.success(AUTH_SUCCESS.REGISTER_SUCCESS, {
+          description: AUTH_SUCCESS.REGISTER_SUCCESS_DESC,
         });
 
         form.reset();
       } catch (error) {
         console.error(error);
-        toast.error("Something went wrong", {
-          description: "There was an issue registering you. Please try again later.",
+        toast.error(API_ERRORS.GENERIC, {
+          description: API_ERRORS.GENERIC_DESC,
         });
       }
     });
@@ -145,7 +141,7 @@ export const PageClient = () => {
                   Submit
                 </Button>
                 <FieldDescription className="text-center">
-                  Already have an account? <Link href="/login">Login</Link>
+                  Already have an account? <Link href={AUTH_ROUTES.LOGIN}>Login</Link>
                 </FieldDescription>
               </Field>
             </FieldGroup>
