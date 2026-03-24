@@ -27,7 +27,7 @@ export const HttpStatus = {
   FORBIDDEN: HTTP_FORBIDDEN,
   NOT_FOUND: HTTP_NOT_FOUND,
   INTERNAL_SERVER_ERROR: HTTP_INTERNAL_SERVER_ERROR,
-};
+} as const;
 
 export function getStatusText(status: number): string {
   return STATUS_TEXT_MAP[status] || "";
