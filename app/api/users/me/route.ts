@@ -3,7 +3,8 @@ import { eq } from "drizzle-orm";
 import { profiles } from "@/drizzle/schemas";
 
 import { db } from "@/lib/drizzle/db";
-import { apiResponse } from "@/lib/api-response";
+
+import { apiResponse } from "@/utils/response";
 
 import { requireAuth } from "@/common/guards/auth.guard";
 
