@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 
 import type { SelectProfile } from "@/types/drizzle.types";
 
-import { getProfileQueryOptions } from "@/queries/profile.query";
+import { getUserQueryOptions } from "@/queries/user.query";
 
 type UserProfileContextType = {
   profile: SelectProfile | null;
@@ -16,7 +16,7 @@ type UserProfileContextType = {
 export const UserProfileContext = createContext<UserProfileContextType | null>(null);
 
 export const UserProfileProvider = ({ children }: PropsWithChildren) => {
-  const { data, isLoading, error } = useQuery(getProfileQueryOptions());
+  const { data, isLoading, error } = useQuery(getUserQueryOptions());
 
   return (
     <UserProfileContext.Provider value={{ profile: data ?? null, isLoading, error }}>
