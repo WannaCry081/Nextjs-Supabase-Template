@@ -1,12 +1,11 @@
 import { z } from "zod";
 import { Resend } from "resend";
 
-import { apiResponse } from "@/lib/api-response";
+import { apiResponse } from "@/utils/response";
 
 import { requireAuth } from "@/common/guards/auth.guard";
 
 import { HttpStatus } from "@/constants/http-status.constant";
-import { API_ERRORS, EMAIL_ERRORS } from "@/constants/http-error-messages.constant";
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const RESEND_EMAIL_FROM = process.env.RESEND_EMAIL_FROM;
@@ -29,7 +28,7 @@ export async function POST(req: Request) {
 
     if (!validation.success) {
       return apiResponse({
-        data: API_ERRORS.MISSING_FIELDS,
+        data: "Invalid request body",
         status: HttpStatus.BAD_REQUEST,
       });
     }
@@ -38,7 +37,7 @@ export async function POST(req: Request) {
 
     if (!RESEND_API_KEY || !RESEND_EMAIL_FROM) {
       return apiResponse({
-        data: EMAIL_ERRORS.NOT_CONFIGURED,
+        data: "Email service not configured",
         status: HttpStatus.INTERNAL_SERVER_ERROR,
       });
     }
@@ -59,7 +58,7 @@ export async function POST(req: Request) {
     console.error("Error sending email:", error);
 
     return apiResponse({
-      data: EMAIL_ERRORS.SEND_FAILED,
+      data: "Failed to send email",
       status: HttpStatus.INTERNAL_SERVER_ERROR,
     });
   }

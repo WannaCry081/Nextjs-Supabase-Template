@@ -1,4 +1,4 @@
-import { apiResponse } from "@/lib/api-response";
+import { apiResponse } from "@/utils/response";
 
 import { HttpStatus } from "@/constants/http-status.constant";
 
