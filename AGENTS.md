@@ -74,7 +74,7 @@ Copy `.env.example` to `.env.local` and fill in your values. See:
 - Database: `lib/drizzle/db.ts`, `config/drizzle.config.ts`
 - Auth: `lib/supabase/client.ts`, `lib/supabase/server.ts`
 - SEO: `constants/seo.constant.ts`
-- Email: `app/api/send/route.ts`
+- Email: `app/api/mail/send/route.ts`
 
 ### Quick Start
 
@@ -188,15 +188,15 @@ No deployment automation is currently configured. The CI validates code quality 
 - Route files use Next.js App Router conventions (`app/**/page.tsx`, `app/**/layout.tsx`).
 - Interactive route logic is commonly split into `page.client.tsx` (`app/(auth)/*/page.client.tsx`).
 - Domain suffixes:
-  - `*.service.ts` for fetch/API client logic (`services/profile.service.ts`)
-  - `*.query.ts` for TanStack query options (`queries/profile.query.ts`)
+  - `*.service.ts` for fetch/API client logic (`services/users.service.ts`)
+  - `*.query.ts` for TanStack query options (`queries/user.query.ts`)
   - `*.constant.ts` for constants (`constants/*.constant.ts`)
   - `use-*.ts` hooks (`hooks/use-auth.ts`, `hooks/use-user-profile.ts`)
 
 ### Error Handling Patterns
 
 - Client actions: place try/catch inside `startTransition` async callbacks and show toast notifications (`app/(auth)/*/page.client.tsx`).
-- API routes: return structured JSON with proper HTTP status and avoid leaking stack traces (`app/api/users/me/route.ts`, `app/api/send/route.ts`).
+- API routes: return structured JSON with proper HTTP status and avoid leaking stack traces (`app/api/users/me/route.ts`, `app/api/mail/send/route.ts`).
 
 ## Repository Conventions
 
@@ -238,7 +238,7 @@ No deployment automation is currently configured. The CI validates code quality 
 
 ### API and Permission Hygiene
 
-- `app/api/send/route.ts` validates payload shape and requires Supabase authentication.
+- `app/api/mail/send/route.ts` validates payload shape and requires Supabase authentication.
 - Consider adding rate limiting before production use of email endpoints.
 
 ### Dependencies
@@ -272,7 +272,7 @@ No deployment automation is currently configured. The CI validates code quality 
 2. Generate migration with `pnpm db:migrate` and inspect SQL under `drizzle/migrations/`.
 3. Apply migration via `pnpm db:update` (or `pnpm db:push` in development workflows).
 4. Update affected types/services/routes (`types/drizzle.types.ts`, `services/*`, `app/api/*`).
-5. Validate `/api/users/me` and related UI (`components/app-sidebar/*`, `hooks/use-user-profile.ts`).
+5. Validate `/api/users/me` and related UI (`components/app-sidebar/*`, `hooks/use-user-profile.ts` via `useUser`).
 
 ## Troubleshooting & FAQs
 
@@ -288,7 +288,7 @@ No deployment automation is currently configured. The CI validates code quality 
 ### “Build fails with env errors or runtime crashes”
 
 - Verify required env vars in `.env.local`/`.env` and in CI secrets.
-- Check usage points: `lib/supabase/*`, `lib/drizzle/db.ts`, `app/api/send/route.ts`.
+- Check usage points: `lib/supabase/*`, `lib/drizzle/db.ts`, `app/api/mail/send/route.ts`.
 
 ### “Playwright fails locally”
 
@@ -340,8 +340,8 @@ No deployment automation is currently configured. The CI validates code quality 
 | Client pages    | `page.client.tsx`                                    | `app/(auth)/login/page.client.tsx`           |
 | API routes      | `route.ts`                                           | `app/api/users/me/route.ts`                  |
 | Hooks           | `use-hook-name.ts`                                   | `hooks/use-auth.ts`                          |
-| Services        | `name.service.ts`                                    | `services/profile.service.ts`                |
-| Query options   | `name.query.ts`                                      | `queries/profile.query.ts`                   |
+| Services        | `name.service.ts`                                    | `services/users.service.ts`                  |
+| Query options   | `name.query.ts`                                      | `queries/user.query.ts`                      |
 | Constants       | `name.constant.ts`                                   | `constants/seo.constant.ts`                  |
 | Drizzle schemas | `name.schema.ts`                                     | `drizzle/schemas/profiles/profile.schema.ts` |
 | Types           | `name.types.ts`                                      | `types/drizzle.types.ts`                     |
@@ -375,8 +375,9 @@ project/
 │   │   ├── page.tsx
 │   │   └── page.client.tsx        # Landing page with nav, hero, features
 │   ├── api/
+│   │   ├── healthcheck/route.ts   # GET: service health check
 │   │   ├── users/me/route.ts      # GET: profile by Supabase user ID
-│   │   └── send/route.ts          # POST: send email via Resend (auth-gated)
+│   │   └── mail/send/route.ts     # POST: send email via Resend (auth-gated)
 │   ├── styles/globals.css
 │   └── layout.tsx                 # Root layout: fonts, providers
 ├── components/
@@ -413,6 +414,7 @@ project/
 │       ├── textarea.tsx
 │       └── tooltip.tsx
 ├── config/                        # Tool configs
+│   ├── axios.config.ts            # Axios instance with base URL and headers
 │   ├── drizzle.config.ts
 │   ├── playwright.config.ts
 │   └── vitest.config.mts
@@ -420,11 +422,9 @@ project/
 │   ├── guards/                    # Auth guards and validation
 │   └── schemas/                   # Zod validation schemas
 ├── constants/                     # App-wide constants
-│   ├── api.constant.ts            # API endpoint definitions
 │   ├── app-sidebar-items.constant.ts # Sidebar navigation items
-│   ├── http-error-messages.constant.ts # Error messages mapping
-│   ├── http-status.constant.ts    # HTTP status codes
-│   ├── routes.constant.ts         # Route definitions
+│   ├── http-status.constant.ts    # HTTP status codes and HttpStatus object
+│   ├── routes.constant.ts         # Route definitions (PUBLIC, AUTH, PROTECTED, API)
 │   └── seo.constant.ts            # SEO metadata constants
 ├── docs/                          # VitePress documentation site
 │   ├── .vitepress/config.mts
@@ -442,23 +442,22 @@ project/
 ├── hooks/                         # Custom React hooks
 │   ├── use-auth.ts                # Supabase session + onAuthStateChange
 │   ├── use-mobile.ts              # Viewport breakpoint detection
-│   └── use-user-profile.ts        # UserProfileContext consumer
+│   └── use-user-profile.ts        # UserProfileContext consumer (exports useUser)
 ├── lib/                           # Utilities and helpers
 │   ├── drizzle/db.ts              # Drizzle client (postgres.js driver)
 │   ├── query/
 │   │   ├── get-query-client.ts    # TanStack QueryClient factory (SSR-aware)
-│   │   └── query-keys.ts          # Hierarchical query key definitions
+│   │   └── get-query-keys.ts      # Hierarchical query key definitions
 │   ├── seo.ts                     # buildMetadata() helper
 │   ├── supabase/
 │   │   ├── client.ts              # Browser client (singleton)
 │   │   ├── server.ts              # Server client (async, cookie-based)
 │   │   └── middleware.ts          # Session refresh + route protection
-│   ├── api-response.ts            # Response formatting helper
 │   └── utils.ts                   # cn() — clsx + tailwind-merge
 ├── queries/                       # TanStack Query option factories
-│   └── profile.query.ts
-├── services/                      # API client wrappers
-│   └── profile.service.ts
+│   └── user.query.ts
+├── services/                      # API client wrappers (axios-based)
+│   └── users.service.ts
 ├── tests/
 │   ├── unit/utils.test.ts         # Vitest + jsdom
 │   └── e2e/homepage.spec.ts       # Playwright (Chromium/Firefox/WebKit)
@@ -716,16 +715,10 @@ export async function getSupabaseServer() {
 ### Authentication in API Routes
 
 ```typescript
-// Pattern used in app/api/users/me/route.ts and app/api/send/route.ts
-const supabase = await getSupabaseServer();
-const {
-  data: { user },
-  error,
-} = await supabase.auth.getUser();
-
-if (error || !user) {
-  return NextResponse.json({ data: null, error }, { status: 401 });
-}
+// Pattern used in app/api/users/me/route.ts and app/api/mail/send/route.ts
+// Via the requireAuth() guard in common/guards/auth.guard.ts:
+const { user, error } = await requireAuth();
+if (error) return error;
 
 // user.id matches profiles.id in Drizzle schema
 ```
@@ -778,26 +771,23 @@ Component (via useQuery or Provider)
 ```
 
 ```typescript
-// 1. Service — services/profile.service.ts
-export const profileService = {
+// 1. Service — services/users.service.ts
+export const usersService = {
   me: async (): Promise<SelectProfile | null> => {
-    const response = await fetch("/api/users/me");
-    if (response.status === 401) return null;
-    const json = await response.json();
-    if (!response.ok) throw new Error(json.error ?? "Failed to fetch user profile");
-    return json.data ?? null;
+    const response = await axiosInstance.get(API_ROUTES.USERS.ME);
+    return response.data;
   },
 };
 
-// 2. Query Options — queries/profile.query.ts
-export const getProfileQueryOptions = () =>
+// 2. Query Options — queries/user.query.ts
+export const getUserQueryOptions = () =>
   queryOptions({
-    queryKey: profileQueryKey.me(), // ["profile", "me"]
-    queryFn: () => profileService.me(),
+    queryKey: getQueryKey.users.me(), // ["users", "me"]
+    queryFn: () => usersService.me(),
   });
 
 // 3. Component — via UserProfileProvider or direct useQuery
-const { data: profile, isLoading } = useQuery(getProfileQueryOptions());
+const { data: profile, isLoading } = useQuery(getUserQueryOptions());
 ```
 
 ## Error Handling
@@ -879,23 +869,21 @@ try {
 - Use descriptive human-readable error messages in responses
 - Auth-gate sensitive endpoints by checking `supabase.auth.getUser()` first
 
-### Service Layer: Graceful Degradation
+### Service Layer
 
 ```typescript
-// services/profile.service.ts pattern
-if (response.status === 401) return null; // Unauthenticated → null, don't throw
-
-const json = await response.json();
-if (!response.ok) {
-  const message = typeof json.error === "string" ? json.error : "Failed to fetch";
-  throw new Error(message); // TanStack Query catches this automatically
-}
-return json.data ?? null;
+// services/users.service.ts pattern
+export const usersService = {
+  me: async (): Promise<SelectProfile | null> => {
+    const response = await axiosInstance.get(API_ROUTES.USERS.ME);
+    return response.data;
+  },
+};
 ```
 
-- 401 returns `null` gracefully (user simply not logged in)
-- Other errors `throw` — caught by TanStack Query's error handling
-- Consumed via `useQuery` which exposes `{ error, isLoading }` states
+- Services use the shared `axiosInstance` from `config/axios.config.ts`
+- Axios throws automatically on non-2xx responses — TanStack Query catches this
+- Consumed via `useQuery` which exposes `{ data, error, isLoading }` states
 
 ### Form Validation Errors
 
