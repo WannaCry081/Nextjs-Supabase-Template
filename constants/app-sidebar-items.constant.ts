@@ -21,7 +21,6 @@ export const APP_SIDEBAR_ITEMS = {
       },
     ],
   },
-
   secondary: {
     title: "Secondary",
     items: [
