@@ -17,7 +17,6 @@ import { getSupabaseClient } from "@/lib/supabase/client";
 import { registerSchema, type RegisterFormValues } from "@/common/schemas/auth.schema";
 
 import { AUTH_ROUTES, DEFAULT_AUTH_REDIRECT } from "@/constants/routes.constant";
-import { AUTH_ERRORS, AUTH_SUCCESS, API_ERRORS } from "@/constants/http-error-messages.constant";
 
 export const PageClient = () => {
   const supabase = getSupabaseClient();
@@ -48,21 +47,21 @@ export const PageClient = () => {
         });
 
         if (error) {
-          toast.error(AUTH_ERRORS.REGISTER_FAILED, {
-            description: AUTH_ERRORS.REGISTER_FAILED_DESC,
+          toast.error("Registration failed", {
+            description: error.message,
           });
           return;
         }
 
-        toast.success(AUTH_SUCCESS.REGISTER_SUCCESS, {
-          description: AUTH_SUCCESS.REGISTER_SUCCESS_DESC,
+        toast.success("Check your email", {
+          description: "We've sent you a confirmation link.",
         });
 
         form.reset();
       } catch (error) {
         console.error(error);
-        toast.error(API_ERRORS.GENERIC, {
-          description: API_ERRORS.GENERIC_DESC,
+        toast.error("Something went wrong", {
+          description: "Please try again.",
         });
       }
     });

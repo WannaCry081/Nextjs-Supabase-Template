@@ -25,7 +25,6 @@ import { getSupabaseClient } from "@/lib/supabase/client";
 import { loginSchema, type LoginFormValues } from "@/common/schemas/auth.schema";
 
 import { AUTH_ROUTES, DEFAULT_AUTH_REDIRECT } from "@/constants/routes.constant";
-import { AUTH_ERRORS, AUTH_SUCCESS, API_ERRORS } from "@/constants/http-error-messages.constant";
 
 export const PageClient = () => {
   const router = useRouter();
@@ -47,20 +46,20 @@ export const PageClient = () => {
         const { error } = await supabase.auth.signInWithPassword(values);
 
         if (error) {
-          toast.error(AUTH_ERRORS.LOGIN_FAILED, {
-            description: AUTH_ERRORS.LOGIN_FAILED_DESC,
+          toast.error("Login failed", {
+            description: error.message,
           });
           return;
         }
 
-        toast.success(AUTH_SUCCESS.LOGIN_SUCCESS, {
-          description: AUTH_SUCCESS.LOGIN_SUCCESS_DESC,
+        toast.success("Welcome back!", {
+          description: "You have been logged in successfully.",
         });
         router.replace(DEFAULT_AUTH_REDIRECT);
       } catch (error) {
         console.error(error);
-        toast.error(API_ERRORS.GENERIC, {
-          description: API_ERRORS.GENERIC_DESC,
+        toast.error("Something went wrong", {
+          description: "Please try again.",
         });
       }
     });
@@ -79,15 +78,15 @@ export const PageClient = () => {
         });
 
         if (error) {
-          toast.error(AUTH_ERRORS.OAUTH_FAILED(normalizedProviderName), {
-            description: AUTH_ERRORS.OAUTH_FAILED_DESC,
+          toast.error("Login failed", {
+            description: error.message,
           });
           return;
         }
       } catch (error) {
         console.error(error);
-        toast.error(API_ERRORS.GENERIC, {
-          description: API_ERRORS.GENERIC_DESC,
+        toast.error("Something went wrong", {
+          description: "Please try again.",
         });
       }
     });
