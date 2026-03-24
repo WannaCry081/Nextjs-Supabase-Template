@@ -42,7 +42,7 @@
     "clsx": "2.1.1",
     "drizzle-orm": "0.45.1",
     "lucide-react": "0.562.0",
-    "next": "16.1.6",
+    "next": "16.2.1",
     "next-themes": "0.4.6",
     "nextjs-toploader": "3.9.17",
     "postgres": "3.4.7",
@@ -64,7 +64,7 @@
     "@testing-library/dom": "10.4.1",
     "@testing-library/react": "16.3.2",
     "@types/node": "20",
-    "@types/react": "19.2.10",
+    "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
     "@typescript-eslint/eslint-plugin": "8.51.0",
     "@typescript-eslint/parser": "8.51.0",
@@ -73,7 +73,7 @@
     "concurrently": "9.2.1",
     "drizzle-kit": "0.31.8",
     "eslint": "9.39.2",
-    "eslint-config-next": "16.1.6",
+    "eslint-config-next": "16.2.1",
     "eslint-config-prettier": "10.1.8",
     "eslint-plugin-prettier": "5.5.4",
     "eslint-plugin-react": "7.37.5",
@@ -92,7 +92,7 @@
   "packageManager": "pnpm@9.12.2+sha512.22721b3a11f81661ae1ec68ce1a7b879425a1ca5b991c975b074ac220b187ce56c708fe5db69f4c962c989452eee76c82877f4ee80f474cebd61ee13461b6228",
   "pnpm": {
     "overrides": {
-      "@types/react": "19.2.10",
+      "@types/react": "19.2.14",
       "@types/react-dom": "19.2.3",
       "react": "19.2.4",
       "react-dom": "19.2.4"
