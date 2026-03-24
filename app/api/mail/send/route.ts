@@ -2,7 +2,6 @@ import { z } from "zod";
 import { Resend } from "resend";
 
 import { apiResponse } from "@/utils/response";
-
 import { requireAuth } from "@/common/guards/auth.guard";
 
 import { HttpStatus } from "@/constants/http-status.constant";

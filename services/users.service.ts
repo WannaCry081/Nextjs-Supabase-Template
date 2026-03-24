@@ -1,5 +1,4 @@
 import { axiosInstance } from "@/config/axios.config";
-
 import type { SelectProfile } from "@/types/drizzle.types";
 
 import { API_ROUTES } from "@/constants/routes.constant";
