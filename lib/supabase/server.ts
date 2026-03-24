@@ -1,11 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
-/**
- * Server-side Supabase client
- * Use this in Server Components, API routes, and server actions
- * @returns Promise<SupabaseClient>
- */
 export async function getSupabaseServer() {
   const cookieStore = await cookies();
 
@@ -25,6 +20,7 @@ export async function getSupabaseServer() {
           } catch {
             // The `setAll` method was called from a Server Component.
             // This can be ignored if you have middleware refreshing user sessions.
+            console.error("An error occurred while setting cookies");
           }
         },
       },

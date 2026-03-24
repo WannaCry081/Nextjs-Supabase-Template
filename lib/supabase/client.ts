@@ -1,10 +1,6 @@
 import { createBrowserClient } from "@supabase/ssr";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-/**
- * Browser Supabase client singleton
- * Use this in client components and browser-side code
- */
 let browserClient: SupabaseClient | null = null;
 
 export function getSupabaseClient(): SupabaseClient {
@@ -17,7 +13,4 @@ export function getSupabaseClient(): SupabaseClient {
   return browserClient;
 }
 
-/**
- * Direct export for convenience
- */
 export const supabase = getSupabaseClient();

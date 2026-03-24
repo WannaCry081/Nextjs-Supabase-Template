@@ -37,4 +37,4 @@ export const APP_SIDEBAR_ITEMS = {
       },
     ],
   },
-};
+} as const;
