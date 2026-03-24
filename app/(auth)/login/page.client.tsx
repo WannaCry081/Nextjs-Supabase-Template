@@ -68,8 +68,6 @@ export const PageClient = () => {
   const onOAuthSubmit = (provider: "github" | "google") => {
     startTransition(async () => {
       try {
-        const normalizedProviderName = provider.charAt(0).toUpperCase() + provider.slice(1);
-
         const { error } = await supabase.auth.signInWithOAuth({
           provider,
           options: {
