@@ -1,31 +1,38 @@
-import { useEffect, useState } from "react";
-import { Session } from "@supabase/supabase-js";
+"use client";
 
-// Lib
+import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import type { Session, User } from "@supabase/supabase-js";
+
 import { getSupabaseClient } from "@/lib/supabase/client";
 
-export const useAuth = () => {
-  const [session, setSession] = useState<Session | null>(null);
-  const [user, setUser] = useState(session?.user ?? null);
-  const [isLoading, setIsLoading] = useState(true);
+import { getUserQueryOptions } from "@/queries/user.query";
 
+export const useAuth = () => {
   const supabase = getSupabaseClient();
 
+  const [session, setSession] = useState<Session | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
+
+  const { data: profile, isLoading: isProfileLoading } = useQuery({
+    ...getUserQueryOptions(),
+    enabled: !!user,
+  });
+
   useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setIsLoading(false);
+    supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
+      setSession(currentSession);
+      setUser(currentSession?.user ?? null);
+      setIsAuthLoading(false);
     });
 
-    // Listen for auth changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setIsLoading(false);
+    } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+      setSession(nextSession);
+      setUser(nextSession?.user ?? null);
+      setIsAuthLoading(false);
     });
 
     return () => subscription?.unsubscribe();
@@ -34,6 +41,7 @@ export const useAuth = () => {
   return {
     session,
     user,
-    isLoading,
+    profile: user ? (profile ?? null) : null,
+    isLoading: isAuthLoading || (!!user && isProfileLoading),
   };
 };
