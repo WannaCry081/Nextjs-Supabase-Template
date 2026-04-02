@@ -1,9 +1,4 @@
-import {
-  FrameIcon,
-  SettingsIcon,
-  SendIcon,
-  LayoutDashboardIcon,
-} from "lucide-react";
+import { FrameIcon, SettingsIcon, SendIcon, LayoutDashboardIcon } from "lucide-react";
 
 // Customize these items to match your app's navigation.
 // Each section demonstrates a different sidebar pattern:
