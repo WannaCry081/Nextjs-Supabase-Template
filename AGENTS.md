@@ -29,7 +29,7 @@ The starter uses a specific folder structure. Understand these key locations:
 - Database layer: `lib/drizzle/db.ts`, `drizzle/schemas/*`, `drizzle/migrations/*`
 - Data fetching: `services/*` (API wrappers), `queries/*` (React Query options)
 - UI: `components/ui/*` (Shadcn/Radix), `components/shared/*` (reusable), `components/app-sidebar/*` (sidebar shell)
-- Global setup: `components/providers/*` (React Query, theme, auth context)
+- Global setup: `components/providers/*` (React Query, theme, toast/loading)
 
 ### Folder Reference
 
@@ -45,6 +45,7 @@ The starter uses a specific folder structure. Understand these key locations:
 | `types/`      | TypeScript types and interfaces                      |
 | `constants/`  | App-wide constants (routes, SEO, sidebar items)      |
 | `docs/`       | VitePress documentation site                         |
+| `schemas/`    | Zod validation schemas (auth forms, etc.)            |
 
 ## Setup & Prerequisites
 
@@ -191,7 +192,7 @@ No deployment automation is currently configured. The CI validates code quality 
   - `*.service.ts` for fetch/API client logic (`services/users.service.ts`)
   - `*.query.ts` for TanStack query options (`queries/user.query.ts`)
   - `*.constant.ts` for constants (`constants/*.constant.ts`)
-  - `use-*.ts` hooks (`hooks/use-auth.ts`, `hooks/use-user-profile.ts`)
+  - `use-*.ts` hooks (`hooks/use-auth.ts`, `hooks/use-mobile.ts`)
 
 ### Error Handling Patterns
 
@@ -232,9 +233,9 @@ No deployment automation is currently configured. The CI validates code quality 
 
 ### Auth and Route Protection
 
-- Protected route matching is configured centrally in `proxy.ts` via `PROTECTED_ROUTES`.
+- Protected route matching is configured centrally via `PROTECTED_ROUTE_PATTERNS` (derived from `PROTECTED_ROUTES` in `constants/routes.constant.ts`).
 - Supabase session claims gate access in `lib/supabase/middleware.ts`.
-- Add new protected sections to `PROTECTED_ROUTES` when introducing sensitive pages.
+- Add new protected routes to `PROTECTED_ROUTES` in `constants/routes.constant.ts`; patterns are derived automatically.
 
 ### API and Permission Hygiene
 
@@ -255,7 +256,7 @@ No deployment automation is currently configured. The CI validates code quality 
    - API route in `app/api/...`
    - service in `services/...`
    - query options in `queries/...`
-3. If protected, update `PROTECTED_ROUTES` in `proxy.ts`.
+3. If protected, add the route to `PROTECTED_ROUTES` in `constants/routes.constant.ts`.
 4. If dashboard navigation changes, edit `constants/app-sidebar-items.constant.ts`.
 5. Add/update tests in `tests/unit` or `tests/e2e`.
 
@@ -272,13 +273,13 @@ No deployment automation is currently configured. The CI validates code quality 
 2. Generate migration with `pnpm db:migrate` and inspect SQL under `drizzle/migrations/`.
 3. Apply migration via `pnpm db:update` (or `pnpm db:push` in development workflows).
 4. Update affected types/services/routes (`types/drizzle.types.ts`, `services/*`, `app/api/*`).
-5. Validate `/api/users/me` and related UI (`components/app-sidebar/*`, `hooks/use-user-profile.ts` via `useUser`).
+5. Validate `/api/users/me` and related UI (`components/app-sidebar/*`, `hooks/use-auth.ts` via `useAuth`).
 
 ## Troubleshooting & FAQs
 
 ### “Why am I always redirected to `/login`?”
 
-- Path is likely protected by `PROTECTED_ROUTES` in `proxy.ts`, and session claims are missing (`lib/supabase/middleware.ts`).
+- Path is likely protected by `PROTECTED_ROUTE_PATTERNS` (from `constants/routes.constant.ts`), and session claims are missing (`lib/supabase/middleware.ts`).
 
 ### “Why is profile data null in the dashboard/sidebar?”
 
@@ -343,7 +344,8 @@ No deployment automation is currently configured. The CI validates code quality 
 | Services        | `name.service.ts`                                    | `services/users.service.ts`                  |
 | Query options   | `name.query.ts`                                      | `queries/user.query.ts`                      |
 | Constants       | `name.constant.ts`                                   | `constants/seo.constant.ts`                  |
-| Drizzle schemas | `name.schema.ts`                                     | `drizzle/schemas/profiles/profile.schema.ts` |
+| Drizzle schemas | `name.schema.ts`                                     | `drizzle/schemas/profiles/profiles.schema.ts`|
+| Zod schemas     | `name.schema.ts`                                     | `schemas/auth.schema.ts`                     |
 | Types           | `name.types.ts`                                      | `types/drizzle.types.ts`                     |
 
 ## Project Structure
@@ -352,6 +354,7 @@ No deployment automation is currently configured. The CI validates code quality 
 project/
 ├── app/                           # Next.js App Router
 │   ├── (auth)/                    # Auth route group (no URL segment)
+│   │   ├── error.tsx              # Auth error boundary (card-based)
 │   │   ├── layout.tsx             # Centered card layout with branding
 │   │   ├── login/
 │   │   │   ├── page.tsx           # Server entry → renders PageClient
@@ -366,13 +369,14 @@ project/
 │   │       ├── page.tsx
 │   │       └── page.client.tsx
 │   ├── (protected)/               # Protected route group (auth-gated via proxy.ts)
-│   │   ├── layout.tsx             # Sidebar shell + UserProfileProvider
+│   │   ├── error.tsx              # Protected error boundary
+│   │   ├── layout.tsx             # Sidebar shell (SidebarProvider + SiteHeader + AppSidebar)
+│   │   ├── loading.tsx            # Protected loading skeleton
 │   │   └── dashboard/
-│   │       ├── page.tsx
-│   │       └── page.client.tsx
+│   │       └── page.tsx           # Server component (static placeholder)
 │   ├── (public)/                  # Public marketing route group
-│   │   ├── layout.tsx             # Passthrough layout
-│   │   ├── page.tsx
+│   │   ├── error.tsx              # Public error boundary
+│   │   ├── page.tsx               # Server entry → renders PageClient
 │   │   └── page.client.tsx        # Landing page with nav, hero, features
 │   ├── api/
 │   │   ├── healthcheck/route.ts   # GET: service health check
@@ -384,15 +388,13 @@ project/
 │   ├── app-sidebar/               # Dashboard sidebar shell
 │   │   ├── index.tsx              # AppSidebar (use client)
 │   │   ├── nav-drawer.tsx         # Collapsible nested nav
-│   │   ├── nav-primary.tsx        # Main nav items
-│   │   ├── nav-secondary.tsx      # Bottom nav items (settings, feedback)
+│   │   ├── nav-items.tsx          # Sidebar nav items (links with icons)
 │   │   ├── nav-user.tsx           # User avatar + dropdown (use client)
 │   │   └── site-header.tsx        # Sticky header + breadcrumb (use client)
 │   ├── providers/                 # React context providers
 │   │   ├── app-provider.tsx       # Toaster + TopLoader + TooltipProvider
 │   │   ├── react-query-provider.tsx  # QueryClientProvider + DevTools
-│   │   ├── theme-provider.tsx     # next-themes ThemeProvider
-│   │   └── user-profile-provider.tsx # Profile context via React Query
+│   │   └── theme-provider.tsx     # next-themes ThemeProvider
 │   ├── shared/                    # Reusable components across features
 │   │   └── password-input.tsx     # Password input with show/hide toggle
 │   └── ui/                        # Shadcn/Radix primitives (DO NOT MODIFY)
@@ -418,9 +420,6 @@ project/
 │   ├── drizzle.config.ts
 │   ├── playwright.config.ts
 │   └── vitest.config.mts
-├── common/                        # Shared domain logic
-│   ├── guards/                    # Auth guards and validation
-│   └── schemas/                   # Zod validation schemas
 ├── constants/                     # App-wide constants
 │   ├── app-sidebar-items.constant.ts # Sidebar navigation items
 │   ├── http-status.constant.ts    # HTTP status codes and HttpStatus object
@@ -436,18 +435,20 @@ project/
 │   │   ├── base.ts                # Shared columns: id, createdAt, updatedAt, deletedAt
 │   │   ├── index.ts               # Re-exports all schemas
 │   │   └── profiles/
-│   │       └── profile.schema.ts  # profiles table
+│   │       └── profiles.schema.ts # profiles table
 │   └── migrations/
 │       └── 0000_InitialCreate.sql
 ├── hooks/                         # Custom React hooks
-│   ├── use-auth.ts                # Supabase session + onAuthStateChange
-│   ├── use-mobile.ts              # Viewport breakpoint detection
-│   └── use-user-profile.ts        # UserProfileContext consumer (exports useUser)
+│   ├── use-auth.ts                # Supabase auth session + profile fetching via React Query
+│   └── use-mobile.ts              # Viewport breakpoint detection
 ├── lib/                           # Utilities and helpers
 │   ├── drizzle/db.ts              # Drizzle client (postgres.js driver)
+│   ├── guards/
+│   │   └── auth.guard.ts          # requireAuth() — Supabase auth guard for API routes
 │   ├── query/
 │   │   ├── get-query-client.ts    # TanStack QueryClient factory (SSR-aware)
 │   │   └── get-query-keys.ts      # Hierarchical query key definitions
+│   ├── response.ts                # apiResponse() — structured JSON response helper
 │   ├── seo.ts                     # buildMetadata() helper
 │   ├── supabase/
 │   │   ├── client.ts              # Browser client (singleton)
@@ -456,6 +457,8 @@ project/
 │   └── utils.ts                   # cn() — clsx + tailwind-merge
 ├── queries/                       # TanStack Query option factories
 │   └── user.query.ts
+├── schemas/                       # Zod validation schemas
+│   └── auth.schema.ts             # Login, register, forgot/reset password schemas
 ├── services/                      # API client wrappers (axios-based)
 │   └── users.service.ts
 ├── tests/
@@ -505,7 +508,6 @@ project/
   1. `ReactQueryProvider` — TanStack Query client + DevTools
   2. `AppProvider` — Toaster (sonner), TopLoader, TooltipProvider
   3. `ThemeProvider` — next-themes (dark/light/system)
-  4. `UserProfileProvider` — profile context (protected routes only, in `app/(protected)/layout.tsx`)
 
 ### Component Hierarchy Rules
 
@@ -532,9 +534,9 @@ This project uses three route groups (parenthesized directories that don't creat
 
 | Group         | Path                                                         | Purpose                | Layout                                 |
 | ------------- | ------------------------------------------------------------ | ---------------------- | -------------------------------------- |
-| `(public)`    | `/`                                                          | Marketing landing page | Passthrough (`<>{children}</>`)        |
+| `(public)`    | `/`                                                          | Marketing landing page | No layout (inherits root)              |
 | `(auth)`      | `/login`, `/register`, `/forgot-password`, `/reset-password` | Auth flows             | Centered card with branding            |
-| `(protected)` | `/dashboard/*`                                               | App shell (auth-gated) | Sidebar + header + UserProfileProvider |
+| `(protected)` | `/dashboard/*`                                               | App shell (auth-gated) | Sidebar + header (SidebarProvider)     |
 
 ### Server/Client Split Pattern
 
@@ -585,20 +587,18 @@ export const PageClient = () => {
 
 ```typescript
 // app/(protected)/layout.tsx
-<UserProfileProvider>
-  <div className="[--header-height:calc(--spacing(14))]">
-    <SidebarProvider className="flex flex-col">
-      <SiteHeader />
-      <div className="flex flex-1">
-        <AppSidebar />
-        <SidebarInset>{children}</SidebarInset>
-      </div>
-    </SidebarProvider>
-  </div>
-</UserProfileProvider>
+<div className="[--header-height:calc(--spacing(14))]">
+  <SidebarProvider className="flex flex-col">
+    <SiteHeader />
+    <div className="flex flex-1">
+      <AppSidebar />
+      <SidebarInset>{children}</SidebarInset>
+    </div>
+  </SidebarProvider>
+</div>
 ```
 
-- `UserProfileProvider` scoped to protected routes only (not global)
+- Profile data is fetched via `useAuth()` hook (in `hooks/use-auth.ts`), not a dedicated provider
 - CSS variable `--header-height` coordinates sticky header and sidebar offset
 - Auth enforcement happens in `proxy.ts` middleware, not in the layout
 
@@ -607,22 +607,23 @@ export const PageClient = () => {
 ```typescript
 // proxy.ts — Next.js middleware entry
 import { updateSession } from "@/lib/supabase/middleware";
-
-const PROTECTED_ROUTES: string[] = ["/dashboard/*"];
+import { PROTECTED_ROUTE_PATTERNS } from "@/constants/routes.constant";
 
 export async function proxy(request: NextRequest) {
-  return await updateSession(request, PROTECTED_ROUTES);
+  return await updateSession(request, PROTECTED_ROUTE_PATTERNS);
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)"],
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico|api/healthcheck|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+  ],
 };
 ```
 
 - Uses `supabase.auth.getClaims()` (not `getUser()`) for performance — avoids a DB round-trip
 - Supports wildcard patterns: `"/dashboard/*"` matches `/dashboard` and `/dashboard/**`
 - Unauthenticated users are redirected to `/login?redirect=<original_path>`
-- **Add new protected routes** by appending to `PROTECTED_ROUTES` array
+- **Add new protected routes** to `PROTECTED_ROUTES` in `constants/routes.constant.ts`
 
 ### Metadata and SEO
 
@@ -647,7 +648,7 @@ export const metadata = buildMetadata({
 2. Create directory: `app/(<group>)/<route-name>/`
 3. Add `page.tsx` (server entry) + `page.client.tsx` (client logic)
 4. Add `metadata` export in `page.tsx` using `buildMetadata()`
-5. If protected, ensure the path matches a pattern in `PROTECTED_ROUTES` in `proxy.ts`
+5. If protected, ensure the path matches a pattern in `PROTECTED_ROUTES` in `constants/routes.constant.ts`
 6. If it needs sidebar navigation, update `constants/app-sidebar-items.constant.ts`
 
 ## Supabase Integration Patterns
@@ -716,7 +717,7 @@ export async function getSupabaseServer() {
 
 ```typescript
 // Pattern used in app/api/users/me/route.ts and app/api/mail/send/route.ts
-// Via the requireAuth() guard in common/guards/auth.guard.ts:
+// Via the requireAuth() guard in lib/guards/auth.guard.ts:
 const { user, error } = await requireAuth();
 if (error) return error;
 
@@ -763,11 +764,11 @@ Service (services/*.service.ts)
 
 Query Options (queries/*.query.ts)
   → TanStack React Query queryOptions factory
-  → hierarchical query keys: ["profile", "me"]
+  → hierarchical query keys: ["users", "me"]
 
-Component (via useQuery or Provider)
+Component (via useQuery or useAuth hook)
   → consumes query options with useQuery()
-  → or via context provider (UserProfileProvider)
+  → or via useAuth() hook (which wraps useQuery internally)
 ```
 
 ```typescript
@@ -786,8 +787,9 @@ export const getUserQueryOptions = () =>
     queryFn: () => usersService.me(),
   });
 
-// 3. Component — via UserProfileProvider or direct useQuery
-const { data: profile, isLoading } = useQuery(getUserQueryOptions());
+// 3. Component — via useAuth() hook or direct useQuery
+const { profile, isLoading } = useAuth();
+// or directly: const { data: profile, isLoading } = useQuery(getUserQueryOptions());
 ```
 
 ## Error Handling
@@ -875,14 +877,18 @@ try {
 // services/users.service.ts pattern
 export const usersService = {
   me: async (): Promise<SelectProfile | null> => {
-    const response = await axiosInstance.get(API_ROUTES.USERS.ME);
-    return response.data;
+    try {
+      const response = await axiosInstance.get<{ data: SelectProfile | null }>(API_ROUTES.USERS.ME);
+      return response.data.data ?? null;
+    } catch {
+      return null;
+    }
   },
 };
 ```
 
 - Services use the shared `axiosInstance` from `config/axios.config.ts`
-- Axios throws automatically on non-2xx responses — TanStack Query catches this
+- Service wraps in try/catch and returns null on failure — isolates error handling from the query layer
 - Consumed via `useQuery` which exposes `{ data, error, isLoading }` states
 
 ### Form Validation Errors
@@ -907,30 +913,15 @@ export const usersService = {
 - React 19 `<Activity>` component shows/hides validation messages
 - `aria-invalid` attribute for accessibility
 
-### Missing: Error Boundaries
+### Error Boundaries
 
-This project currently has **no `error.tsx` files**. When adding error boundaries:
+Error boundaries (`error.tsx`) exist in all three route groups:
 
-```typescript
-// app/(protected)/error.tsx
-"use client";
+- `app/(auth)/error.tsx` — Card-based error boundary with "Back to login" link
+- `app/(protected)/error.tsx` — Inline error boundary with "Try again" button
+- `app/(public)/error.tsx` — Full-page error boundary with "Go home" link
 
-export default function Error({
-  error,
-  reset,
-}: {
-  error: Error & { digest?: string };
-  reset: () => void;
-}) {
-  return (
-    <div className="flex flex-col items-center justify-center min-h-screen gap-4">
-      <h2 className="text-2xl font-bold">Something went wrong!</h2>
-      <p className="text-muted-foreground">{error.message}</p>
-      <Button onClick={() => reset()}>Try again</Button>
-    </div>
-  );
-}
-```
+Each error boundary is a `"use client"` component that receives `{ error, reset }` props. The `reset()` function re-renders the route segment.
 
 ## Documentation (VitePress)
 
@@ -1161,7 +1152,7 @@ export const useExampleStore = create<ExampleStore>((set) => ({
 
 ### Shared Context (React Context)
 
-Used for cross-component data in route groups (e.g., `UserProfileProvider` in the protected layout).
+Used for cross-component data in route groups. Profile data is currently fetched via the `useAuth()` hook (`hooks/use-auth.ts`), not a dedicated context provider.
 
 ## Performance Best Practices
 
@@ -1266,5 +1257,5 @@ export default async function Page() {
 
 - Assumption: `dev` is the primary integration branch; adjust based on your team's workflow
 - Assumption: Manual release/deploy process is acceptable; add CI/CD automation as needed
-- Consideration: Signup flow may need `profiles` table seeding to work with `/api/users/me` endpoint
+- Consideration: Signup flow relies on a Supabase database trigger to auto-create a `profiles` row when a user is created
 - Consideration: Review branch protection rules to align with your team's release process
