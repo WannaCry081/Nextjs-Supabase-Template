@@ -12,9 +12,9 @@ const TIER_CONFIG: Record<
   RateLimitTier,
   { tokens: number; window: Parameters<typeof Ratelimit.slidingWindow>[1] }
 > = {
-  api: { tokens: 20, window: "10 s" },
-  auth: { tokens: 5, window: "60 s" },
-  email: { tokens: 3, window: "60 s" },
+  api: { tokens: 20, window: "10s" },
+  auth: { tokens: 5, window: "60s" },
+  email: { tokens: 3, window: "60s" },
 };
 
 const instances = new Map<RateLimitTier, Ratelimit>();
