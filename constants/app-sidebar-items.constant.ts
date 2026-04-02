@@ -1,10 +1,13 @@
-import { FrameIcon, SettingsIcon, SendIcon, LayoutDashboardIcon } from "lucide-react";
-
-// Customize these items to match your app's navigation.
-// Each section demonstrates a different sidebar pattern:
-//   platform  → flat link list (NavItems)
-//   drawer    → collapsible groups with sub-items (NavDrawer)
-//   secondary → bottom-pinned links (NavItems, mt-auto)
+import {
+  FrameIcon,
+  SettingsIcon,
+  MapIcon,
+  PieChartIcon,
+  SendIcon,
+  LayoutDashboardIcon,
+  DatabaseIcon,
+  UsersIcon,
+} from "lucide-react";
 
 export const APP_SIDEBAR_ITEMS = {
   platform: {
@@ -15,6 +18,16 @@ export const APP_SIDEBAR_ITEMS = {
         url: "#",
         icon: FrameIcon,
       },
+      {
+        name: "Sales & Marketing",
+        url: "#",
+        icon: PieChartIcon,
+      },
+      {
+        name: "Travel",
+        url: "#",
+        icon: MapIcon,
+      },
     ],
   },
   drawer: {
@@ -24,7 +37,28 @@ export const APP_SIDEBAR_ITEMS = {
         url: "/dashboard",
         icon: LayoutDashboardIcon,
         isActive: true,
-        subItems: [{ title: "Overview", url: "/dashboard" }],
+        subItems: [
+          { title: "Overview", url: "/dashboard" },
+          { title: "Analytics", url: "#" },
+        ],
+      },
+      {
+        title: "Data",
+        url: "#",
+        icon: DatabaseIcon,
+        subItems: [
+          { title: "Tables", url: "#" },
+          { title: "Migrations", url: "#" },
+        ],
+      },
+      {
+        title: "Users",
+        url: "#",
+        icon: UsersIcon,
+        subItems: [
+          { title: "All Users", url: "#" },
+          { title: "Roles", url: "#" },
+        ],
       },
     ],
   },
