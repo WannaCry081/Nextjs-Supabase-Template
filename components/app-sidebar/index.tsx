@@ -15,13 +15,13 @@ import {
 } from "@/components/ui/sidebar";
 import { NavUser } from "@/components/app-sidebar/nav-user";
 
-import { NavPrimary } from "./nav-primary";
+import { NavItems } from "./nav-items";
+import { NavDrawer } from "./nav-drawer";
 
 import { APP_SIDEBAR_ITEMS } from "@/constants/app-sidebar-items.constant";
 
 import { getSupabaseClient } from "@/lib/supabase/client";
 import { useRouter } from "nextjs-toploader/app";
-import { NavSecondary } from "./nav-secondary";
 
 import { useAuth } from "@/hooks/use-auth";
 
@@ -56,8 +56,9 @@ export const AppSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) =
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavPrimary {...APP_SIDEBAR_ITEMS.platform} />
-        <NavSecondary {...APP_SIDEBAR_ITEMS.secondary} className="mt-auto" />
+        <NavItems {...APP_SIDEBAR_ITEMS.platform} />
+        <NavDrawer items={APP_SIDEBAR_ITEMS.drawer.items} />
+        <NavItems {...APP_SIDEBAR_ITEMS.secondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
         <NavUser profile={profile} handleSignOut={handleSignOut} isLoading={isLoading} />

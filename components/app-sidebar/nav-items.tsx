@@ -11,8 +11,8 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 
-interface NavPrimaryProps extends React.ComponentPropsWithoutRef<typeof SidebarGroup> {
-  title: string;
+interface NavItemsProps extends React.ComponentPropsWithoutRef<typeof SidebarGroup> {
+  title?: string;
   items: readonly {
     name: string;
     url: string;
@@ -20,10 +20,10 @@ interface NavPrimaryProps extends React.ComponentPropsWithoutRef<typeof SidebarG
   }[];
 }
 
-export const NavPrimary = ({ title, items, ...props }: NavPrimaryProps) => {
+export const NavItems = ({ title, items, ...props }: NavItemsProps) => {
   return (
     <SidebarGroup {...props}>
-      <SidebarGroupLabel>{title}</SidebarGroupLabel>
+      {title && <SidebarGroupLabel>{title}</SidebarGroupLabel>}
       <SidebarGroupContent>
         <SidebarMenu>
           {items.map((item) => (

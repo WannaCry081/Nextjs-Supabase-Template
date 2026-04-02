@@ -1,4 +1,13 @@
-import { FrameIcon, SettingsIcon, MapIcon, PieChartIcon, SendIcon } from "lucide-react";
+import {
+  FrameIcon,
+  SettingsIcon,
+  MapIcon,
+  PieChartIcon,
+  SendIcon,
+  LayoutDashboardIcon,
+  DatabaseIcon,
+  UsersIcon,
+} from "lucide-react";
 
 export const APP_SIDEBAR_ITEMS = {
   platform: {
@@ -18,6 +27,38 @@ export const APP_SIDEBAR_ITEMS = {
         name: "Travel",
         url: "#",
         icon: MapIcon,
+      },
+    ],
+  },
+  drawer: {
+    items: [
+      {
+        title: "Dashboard",
+        url: "/dashboard",
+        icon: LayoutDashboardIcon,
+        isActive: true,
+        subItems: [
+          { title: "Overview", url: "/dashboard" },
+          { title: "Analytics", url: "#" },
+        ],
+      },
+      {
+        title: "Data",
+        url: "#",
+        icon: DatabaseIcon,
+        subItems: [
+          { title: "Tables", url: "#" },
+          { title: "Migrations", url: "#" },
+        ],
+      },
+      {
+        title: "Users",
+        url: "#",
+        icon: UsersIcon,
+        subItems: [
+          { title: "All Users", url: "#" },
+          { title: "Roles", url: "#" },
+        ],
       },
     ],
   },
