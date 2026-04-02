@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { toast } from "sonner";
 import { useRouter } from "nextjs-toploader/app";
-import { Activity, useTransition } from "react";
+import { useTransition } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -147,9 +147,7 @@ export const PageClient = () => {
                       aria-invalid={fieldState.invalid}
                       disabled={isPending}
                     />
-                    <Activity mode={fieldState.error ? "visible" : "hidden"}>
-                      <FieldError errors={[fieldState.error]} />
-                    </Activity>
+                    {fieldState.error ? <FieldError errors={[fieldState.error]} /> : null}
                   </Field>
                 )}
               />
@@ -173,9 +171,7 @@ export const PageClient = () => {
                       disabled={isPending}
                       aria-invalid={fieldState.invalid}
                     />
-                    <Activity mode={fieldState.error ? "visible" : "hidden"}>
-                      <FieldError errors={[fieldState.error]} />
-                    </Activity>
+                    {fieldState.error ? <FieldError errors={[fieldState.error]} /> : null}
                   </Field>
                 )}
               />
