@@ -18,7 +18,7 @@ A full-stack starter template with **Next.js 16**, **Supabase** authentication &
 
 ## 🚀 Installation
 
-#### 1. Clone & Install
+### 1. Clone & Install
 
 ```bash
 git clone https://github.com/WannaCry081/Nextjs-Supabase-Template.git
@@ -26,7 +26,7 @@ cd nextjs-supabase-template
 pnpm install
 ```
 
-#### 2. Environment Setup
+### 2. Environment Setup
 
 ```bash
 cp .env.example .env.local
@@ -50,18 +50,18 @@ RESEND_EMAIL_FROM=noreply@example.com
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
 ```
 
-#### 3. Initialize Database & Run
+### 3. Initialize Database & Run
 
 ```bash
 pnpm db:push                # Push migrations to Supabase
-pnpm start:development      # Start dev server at http://localhost:3000
+pnpm dev                    # Start dev server at http://localhost:3000
 ```
 
 ## 📚 Available Commands
 
 ```bash
 # Development
-pnpm start:development      # Dev server
+pnpm dev                    # Dev server
 pnpm start:all              # App + docs + DB studio in parallel
 pnpm build                  # Production build
 pnpm start                  # Run production build
@@ -82,7 +82,7 @@ pnpm test:e2e               # E2E tests (Playwright)
 pnpm test:e2e:debug         # Debug E2E tests
 
 # Documentation
-pnpm docs:development       # VitePress dev server
+pnpm docs:dev               # VitePress dev server
 pnpm docs:build             # Build docs
 ```
 
