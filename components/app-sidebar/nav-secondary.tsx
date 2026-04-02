@@ -1,5 +1,6 @@
 import * as React from "react";
 import type { LucideIcon } from "lucide-react";
+import Link from "next/link";
 
 import {
   SidebarGroup,
@@ -10,7 +11,7 @@ import {
 } from "@/components/ui/sidebar";
 
 interface NavSecondaryProps extends React.ComponentPropsWithoutRef<typeof SidebarGroup> {
-  items: {
+  items: readonly {
     name: string;
     url: string;
     icon: LucideIcon;
@@ -25,10 +26,10 @@ export const NavSecondary = ({ items, ...props }: NavSecondaryProps) => {
           {items.map((item) => (
             <SidebarMenuItem key={item.name}>
               <SidebarMenuButton asChild size="sm">
-                <a href={item.url}>
+                <Link href={item.url}>
                   <item.icon />
                   <span>{item.name}</span>
-                </a>
+                </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
           ))}

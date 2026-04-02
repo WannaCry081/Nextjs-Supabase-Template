@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { Command } from "lucide-react";
+import Link from "next/link";
 
 import {
   Sidebar,
@@ -12,12 +13,9 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { Skeleton } from "@/components/ui/skeleton";
 import { NavUser } from "@/components/app-sidebar/nav-user";
 
 import { NavPrimary } from "./nav-primary";
-
-import { useUserProfile } from "@/hooks/use-user-profile";
 
 import { APP_SIDEBAR_ITEMS } from "@/constants/app-sidebar-items.constant";
 
@@ -25,11 +23,13 @@ import { getSupabaseClient } from "@/lib/supabase/client";
 import { useRouter } from "nextjs-toploader/app";
 import { NavSecondary } from "./nav-secondary";
 
+import { useAuth } from "@/hooks/use-auth";
+
 export const AppSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
   const router = useRouter();
   const supabase = getSupabaseClient();
 
-  const { profile, isLoading } = useUserProfile();
+  const { profile, isLoading } = useAuth();
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -42,15 +42,15 @@ export const AppSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) =
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <a href="#">
+              <Link href="/">
                 <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
                   <Command className="size-4" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">Acme Inc</span>
-                  <span className="truncate text-xs">Enterprise</span>
+                  <span className="truncate font-medium">Template</span>
+                  <span className="truncate text-xs">Next.js + Supabase</span>
                 </div>
-              </a>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
@@ -60,11 +60,7 @@ export const AppSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) =
         <NavSecondary {...APP_SIDEBAR_ITEMS.secondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
-        {isLoading ? (
-          <Skeleton className="h-10 w-full rounded-lg" />
-        ) : (
-          <NavUser user={profile} handleSignOut={handleSignOut} />
-        )}
+        <NavUser profile={profile} handleSignOut={handleSignOut} isLoading={isLoading} />
       </SidebarFooter>
     </Sidebar>
   );
