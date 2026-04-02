@@ -2,8 +2,8 @@ import { eq } from "drizzle-orm";
 
 import { profiles } from "@/drizzle/schemas";
 import { db } from "@/lib/drizzle/db";
-import { apiResponse } from "@/utils/response";
-import { requireAuth } from "@/common/guards/auth.guard";
+import { apiResponse } from "@/lib/response";
+import { requireAuth } from "@/lib/guards/auth.guard";
 
 import { HttpStatus } from "@/constants/http-status.constant";
 

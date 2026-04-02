@@ -1,4 +1,4 @@
-import { apiResponse } from "@/utils/response";
+import { apiResponse } from "@/lib/response";
 import { HttpStatus } from "@/constants/http-status.constant";
 
 export async function GET() {
