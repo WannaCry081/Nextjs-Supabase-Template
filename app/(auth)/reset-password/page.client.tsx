@@ -13,7 +13,7 @@ import { PasswordInput } from "@/components/shared/password-input";
 
 import { getSupabaseClient } from "@/lib/supabase/client";
 
-import { resetPasswordSchema, type ResetPasswordFormValues } from "@/common/schemas/auth.schema";
+import { resetPasswordSchema, type ResetPasswordFormValues } from "@/schemas/auth.schema";
 
 export const PageClient = () => {
   const supabase = getSupabaseClient();

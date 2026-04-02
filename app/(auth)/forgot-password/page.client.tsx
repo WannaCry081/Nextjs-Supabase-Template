@@ -13,7 +13,7 @@ import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/c
 
 import { getSupabaseClient } from "@/lib/supabase/client";
 
-import { type ForgotPasswordFormValues, forgotPasswordSchema } from "@/common/schemas/auth.schema";
+import { type ForgotPasswordFormValues, forgotPasswordSchema } from "@/schemas/auth.schema";
 
 export const PageClient = () => {
   const supabase = getSupabaseClient();

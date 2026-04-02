@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { User } from "@supabase/supabase-js";
 
-import { apiResponse } from "@/utils/response";
+import { apiResponse } from "@/lib/response";
 import { getSupabaseServer } from "@/lib/supabase/server";
 
 import { HttpStatus } from "@/constants/http-status.constant";

@@ -22,7 +22,7 @@ import { PasswordInput } from "@/components/shared/password-input";
 
 import { getSupabaseClient } from "@/lib/supabase/client";
 
-import { loginSchema, type LoginFormValues } from "@/common/schemas/auth.schema";
+import { loginSchema, type LoginFormValues } from "@/schemas/auth.schema";
 
 import { AUTH_ROUTES, DEFAULT_AUTH_REDIRECT } from "@/constants/routes.constant";
 
