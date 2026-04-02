@@ -28,7 +28,7 @@ All routes are defined in one place with clear organization:
 
 // Public routes that do not require authentication
 export const PUBLIC_ROUTES = {
-  HOME: "/",
+  ROOT: "/",
 } as const;
 
 // Authentication-related routes
@@ -46,9 +46,13 @@ export const PROTECTED_ROUTES = {
 
 // API routes
 export const API_ROUTES = {
-  USERS_ME: "/api/users/me",
-  SEND_EMAIL: "/api/send",
-  HEALTH: "/api/health",
+  USERS: {
+    ME: "/api/users/me",
+  },
+  MAIL: {
+    SEND: "/api/mail/send",
+  },
+  HEALTHCHECK: "/api/healthcheck",
 } as const;
 ```
 
@@ -80,17 +84,13 @@ export async function proxy(request: NextRequest) {
 ### In Services
 
 ```typescript
-// services/profile.service.ts
+// services/users.service.ts
 import { API_ROUTES } from "@/constants/routes.constant";
 
-export const profileService = {
+export const usersService = {
   me: async (): Promise<SelectProfile | null> => {
-    const response = await fetch(API_ROUTES.USERS_ME);
-
-    if (response.status === 401) return null;
-    const json = await response.json();
-    if (!response.ok) throw new Error(json.error);
-    return json.data ?? null;
+    const response = await axiosInstance.get<{ data: SelectProfile | null }>(API_ROUTES.USERS.ME);
+    return response.data.data ?? null;
   },
 };
 ```

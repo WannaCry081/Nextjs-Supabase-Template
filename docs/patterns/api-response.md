@@ -29,7 +29,7 @@ The `apiResponse()` function:
 - ✅ Fully type-safe with TypeScript inference
 
 ```typescript
-// lib/api-response.ts
+// lib/response.ts
 export function apiResponse<T = unknown>({
   data = null,
   status,
@@ -86,8 +86,8 @@ The `error` field automatically includes human-readable status text (e.g., "Bad 
 
 ```typescript
 // app/api/users/me/route.ts
-import { apiResponse } from "@/lib/api-response";
-import { requireAuth } from "@/common/guards/auth.guard";
+import { apiResponse } from "@/lib/response";
+import { requireAuth } from "@/lib/guards/auth.guard";
 import { HttpStatus } from "@/constants/http-status.constant";
 
 export async function GET() {
@@ -122,8 +122,8 @@ Response when authenticated:
 
 ```typescript
 // app/api/send/route.ts
-import { apiResponse } from "@/lib/api-response";
-import { requireAuth } from "@/common/guards/auth.guard";
+import { apiResponse } from "@/lib/response";
+import { requireAuth } from "@/lib/guards/auth.guard";
 import { HttpStatus } from "@/constants/http-status.constant";
 
 export async function POST(request: NextRequest) {
@@ -176,22 +176,15 @@ Response when validation fails:
 On the client, handle API responses with proper error messaging:
 
 ```typescript
-// services/profile.service.ts
-export const profileService = {
+// services/users.service.ts
+export const usersService = {
   me: async (): Promise<SelectProfile | null> => {
-    const response = await fetch("/api/users/me");
-
-    if (response.status === 401) {
-      return null; // Graceful degradation for unauthenticated users
+    try {
+      const response = await axiosInstance.get<{ data: SelectProfile | null }>(API_ROUTES.USERS.ME);
+      return response.data.data ?? null;
+    } catch {
+      return null;
     }
-
-    const json = await response.json();
-
-    if (!response.ok) {
-      throw new Error(json.error ?? "Failed to fetch profile");
-    }
-
-    return json.data ?? null;
   },
 };
 ```

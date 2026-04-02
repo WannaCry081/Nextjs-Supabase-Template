@@ -134,7 +134,7 @@ const form = useForm<LoginForm>({
 **Key Principles:**
 
 - Routes defined in one place (`constants/routes.constant.ts`)
-- Organized by type: public, auth, protected, API
+- Grouped by type: public, auth, protected, API (nested)
 - Eliminates string duplication across codebase
 
 **When to use:**
@@ -153,7 +153,7 @@ import { AUTH_ROUTES, PROTECTED_ROUTES, API_ROUTES } from "@/constants/routes.co
 <Link href={AUTH_ROUTES.LOGIN}>Sign In</Link>
 
 // In services
-const response = await fetch(API_ROUTES.USERS_ME);
+const response = await axiosInstance.get(API_ROUTES.USERS.ME);
 
 // In middleware
 const patterns = Object.values(PROTECTED_ROUTES).map(r => `${r}/*`);
@@ -189,24 +189,24 @@ const patterns = Object.values(PROTECTED_ROUTES).map(r => `${r}/*`);
 
 ```typescript
 // Define cache keys
-export const queryKeys = {
-  profile: {
-    all: ["profile"] as const,
-    me: () => [...queryKeys.profile.all, "me"] as const,
+export const getQueryKey = {
+  users: {
+    all: ["users"] as const,
+    me: () => [...getQueryKey.users.all, "me"] as const,
   },
 };
 
 // Use in queries
 const { data } = useQuery(
   queryOptions({
-    queryKey: queryKeys.profile.me(),
-    queryFn: () => profileService.me(),
+    queryKey: getQueryKey.users.me(),
+    queryFn: () => usersService.me(),
   })
 );
 
 // Invalidate after mutation
 queryClient.invalidateQueries({
-  queryKey: queryKeys.profile.all,
+  queryKey: getQueryKey.users.all,
 });
 ```
 

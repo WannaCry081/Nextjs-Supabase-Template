@@ -99,15 +99,15 @@ lib/               # Utilities & helpers
 ├── supabase/      # Supabase client setup
 ├── drizzle/       # Database connection
 ├── query/         # React Query setup
-└── api-response.ts # Response formatting
+├── guards/        # Auth guards (requireAuth)
+└── response.ts    # API response formatting
+
+schemas/           # Zod validation schemas
+└── auth.schema.ts # Auth form schemas
 
 drizzle/           # Database schema & migrations
 ├── schemas/       # Table definitions
 └── migrations/    # SQL migrations
-
-common/            # Shared domain logic
-├── guards/        # Auth guards
-└── schemas/       # Zod validation schemas
 
 constants/         # App-wide constants
 ├── routes.constant.ts      # URL definitions
@@ -128,7 +128,7 @@ The template includes a complete auth system:
 - **Forgot Password** (`/forgot-password`) - Request password reset
 - **Reset Password** (`/reset-password`) - Complete the reset flow
 
-All forms use Zod schemas (defined in `common/schemas/auth.schema.ts`) for validation.
+All forms use Zod schemas (defined in `schemas/auth.schema.ts`) for validation.
 
 **Example:**
 
@@ -136,7 +136,7 @@ All forms use Zod schemas (defined in `common/schemas/auth.schema.ts`) for valid
 "use client";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { loginSchema } from "@/common/schemas/auth.schema";
+import { loginSchema } from "@/schemas/auth.schema";
 
 export function LoginForm() {
   const form = useForm({
@@ -204,8 +204,8 @@ Create type-safe API endpoints with consistent response formatting:
 
 ```typescript
 // app/api/users/me/route.ts
-import { apiResponse } from "@/lib/api-response";
-import { requireAuth } from "@/common/guards/auth.guard";
+import { apiResponse } from "@/lib/response";
+import { requireAuth } from "@/lib/guards/auth.guard";
 import { HttpStatus } from "@/constants/http-status.constant";
 
 export async function GET() {
@@ -242,15 +242,15 @@ Handle data fetching, caching, and synchronization:
 **1. Define Query Options:**
 
 ```typescript
-// queries/profile.query.ts
+// queries/user.query.ts
 import { queryOptions } from "@tanstack/react-query";
-import { queryKeys } from "@/lib/query/query-keys";
-import { profileService } from "@/services/profile.service";
+import { getQueryKey } from "@/lib/query/get-query-keys";
+import { usersService } from "@/services/users.service";
 
-export const getProfileQueryOptions = () =>
+export const getUserQueryOptions = () =>
   queryOptions({
-    queryKey: queryKeys.profile.me(),
-    queryFn: () => profileService.me(),
+    queryKey: getQueryKey.users.me(),
+    queryFn: () => usersService.me(),
   });
 ```
 
@@ -259,10 +259,10 @@ export const getProfileQueryOptions = () =>
 ```typescript
 "use client";
 import { useQuery } from "@tanstack/react-query";
-import { getProfileQueryOptions } from "@/queries/profile.query";
+import { getUserQueryOptions } from "@/queries/user.query";
 
 export function UserProfile() {
-  const { data: profile, isLoading, error } = useQuery(getProfileQueryOptions());
+  const { data: profile, isLoading, error } = useQuery(getUserQueryOptions());
 
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error loading profile</div>;
@@ -281,12 +281,12 @@ Wrap your app with providers for global state:
 
 import { createContext, useContext } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { getProfileQueryOptions } from "@/queries/profile.query";
+import { getUserQueryOptions } from "@/queries/user.query";
 
 const UserProfileContext = createContext(null);
 
 export function UserProfileProvider({ children }) {
-  const { data: profile } = useQuery(getProfileQueryOptions());
+  const { data: profile } = useQuery(getUserQueryOptions());
 
   return (
     <UserProfileContext.Provider value={{ profile }}>
@@ -515,7 +515,7 @@ For deep dives into each pattern, see [Architecture Patterns →](./patterns/)
 
 - **Auth flow:** Check `app/(auth)/login/page.client.tsx`
 - **Protected API:** See `app/api/users/me/route.ts`
-- **Data fetching:** Look at `queries/profile.query.ts` and `services/profile.service.ts`
+- **Data fetching:** Look at `queries/user.query.ts` and `services/users.service.ts`
 - **Form handling:** Study `app/(auth)/register/page.client.tsx`
 
 ### Learn More

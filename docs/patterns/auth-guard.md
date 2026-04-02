@@ -13,7 +13,7 @@ Without a centralized guard, auth logic gets duplicated in every endpoint.
 The `requireAuth()` guard provides a consistent way to verify authentication in API routes:
 
 ```typescript
-// common/guards/auth.guard.ts
+// lib/guards/auth.guard.ts
 export async function requireAuth(): Promise<{
   user: User | null;
   error: NextResponse | null;
@@ -29,7 +29,7 @@ export async function requireAuth(): Promise<{
       return {
         user: null,
         error: apiResponse({
-          data: authError?.message ?? AUTH_ERRORS.UNAUTHORIZED,
+          data: authError?.message ?? "Unauthorized",
           status: HttpStatus.UNAUTHORIZED,
         }),
       };
@@ -41,7 +41,7 @@ export async function requireAuth(): Promise<{
     return {
       user: null,
       error: apiResponse({
-        data: AUTH_ERRORS.UNAUTHORIZED,
+        data: "Unauthorized",
         status: HttpStatus.UNAUTHORIZED,
       }),
     };
@@ -53,7 +53,7 @@ export async function requireAuth(): Promise<{
 
 ```typescript
 // app/api/users/me/route.ts
-import { requireAuth } from "@/common/guards/auth.guard";
+import { requireAuth } from "@/lib/guards/auth.guard";
 
 export async function GET(request: NextRequest) {
   const { user, error } = await requireAuth();
@@ -111,7 +111,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error("Process error:", error);
     return apiResponse({
-      data: API_ERRORS.GENERIC,
+      data: "Something went wrong",
       status: HttpStatus.INTERNAL_SERVER_ERROR,
     });
   }
