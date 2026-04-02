@@ -1,0 +1,15 @@
+"use client";
+
+import { Button } from "@/components/ui/button";
+
+export default function Error({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
+  return (
+    <div className="flex flex-1 flex-col items-center justify-center gap-4 p-4">
+      <h2 className="text-2xl font-bold">Something went wrong</h2>
+      <p className="text-muted-foreground max-w-md text-center text-sm">
+        An unexpected error occurred. Please try again or return to the dashboard.
+      </p>
+      <Button onClick={() => reset()}>Try again</Button>
+    </div>
+  );
+}
