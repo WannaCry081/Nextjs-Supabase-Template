@@ -68,6 +68,8 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY   # Supabase publishable key
 NEXT_PUBLIC_SITE_URL                   # Your app URL (e.g., http://localhost:3000)
 RESEND_API_KEY                         # Email API key (Resend)
 RESEND_EMAIL_FROM                      # Sender email address
+UPSTASH_REDIS_REST_URL                 # Upstash Redis URL (for rate limiting)
+UPSTASH_REDIS_REST_TOKEN               # Upstash Redis token (for rate limiting)
 ```
 
 Copy `.env.example` to `.env.local` and fill in your values. See:
@@ -240,7 +242,9 @@ No deployment automation is currently configured. The CI validates code quality 
 ### API and Permission Hygiene
 
 - `app/api/mail/send/route.ts` validates payload shape and requires Supabase authentication.
-- Consider adding rate limiting before production use of email endpoints.
+- All API routes are rate limited via Upstash Redis (`lib/ratelimit.ts`). Rate limiting is optional — it gracefully skips when `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` env vars are not set.
+- Rate limit tiers: `api` (20 req/10s for general), `auth` (5 req/60s for login/register), `email` (3 req/60s for mail sending).
+- 429 responses include `Retry-After`, `X-RateLimit-Limit`, `X-RateLimit-Remaining`, and `X-RateLimit-Reset` headers.
 
 ### Dependencies
 
@@ -334,19 +338,19 @@ No deployment automation is currently configured. The CI validates code quality 
 
 ### File Naming Patterns
 
-| Category        | Pattern                                              | Example                                      |
-| --------------- | ---------------------------------------------------- | -------------------------------------------- |
-| Components      | `component-name.tsx`                                 | `password-input.tsx`                         |
-| Pages           | `page.tsx`, `layout.tsx`, `loading.tsx`, `error.tsx` | `app/(auth)/login/page.tsx`                  |
-| Client pages    | `page.client.tsx`                                    | `app/(auth)/login/page.client.tsx`           |
-| API routes      | `route.ts`                                           | `app/api/users/me/route.ts`                  |
-| Hooks           | `use-hook-name.ts`                                   | `hooks/use-auth.ts`                          |
-| Services        | `name.service.ts`                                    | `services/users.service.ts`                  |
-| Query options   | `name.query.ts`                                      | `queries/user.query.ts`                      |
-| Constants       | `name.constant.ts`                                   | `constants/seo.constant.ts`                  |
-| Drizzle schemas | `name.schema.ts`                                     | `drizzle/schemas/profiles/profiles.schema.ts`|
-| Zod schemas     | `name.schema.ts`                                     | `schemas/auth.schema.ts`                     |
-| Types           | `name.types.ts`                                      | `types/drizzle.types.ts`                     |
+| Category        | Pattern                                              | Example                                       |
+| --------------- | ---------------------------------------------------- | --------------------------------------------- |
+| Components      | `component-name.tsx`                                 | `password-input.tsx`                          |
+| Pages           | `page.tsx`, `layout.tsx`, `loading.tsx`, `error.tsx` | `app/(auth)/login/page.tsx`                   |
+| Client pages    | `page.client.tsx`                                    | `app/(auth)/login/page.client.tsx`            |
+| API routes      | `route.ts`                                           | `app/api/users/me/route.ts`                   |
+| Hooks           | `use-hook-name.ts`                                   | `hooks/use-auth.ts`                           |
+| Services        | `name.service.ts`                                    | `services/users.service.ts`                   |
+| Query options   | `name.query.ts`                                      | `queries/user.query.ts`                       |
+| Constants       | `name.constant.ts`                                   | `constants/seo.constant.ts`                   |
+| Drizzle schemas | `name.schema.ts`                                     | `drizzle/schemas/profiles/profiles.schema.ts` |
+| Zod schemas     | `name.schema.ts`                                     | `schemas/auth.schema.ts`                      |
+| Types           | `name.types.ts`                                      | `types/drizzle.types.ts`                      |
 
 ## Project Structure
 
@@ -449,6 +453,7 @@ project/
 │   │   ├── get-query-client.ts    # TanStack QueryClient factory (SSR-aware)
 │   │   └── get-query-keys.ts      # Hierarchical query key definitions
 │   ├── response.ts                # apiResponse() — structured JSON response helper
+│   ├── ratelimit.ts               # Upstash rate limiting (sliding window, 3 tiers)
 │   ├── seo.ts                     # buildMetadata() helper
 │   ├── supabase/
 │   │   ├── client.ts              # Browser client (singleton)
@@ -532,11 +537,11 @@ providers/   → Context providers (wrap in layouts)
 
 This project uses three route groups (parenthesized directories that don't create URL segments):
 
-| Group         | Path                                                         | Purpose                | Layout                                 |
-| ------------- | ------------------------------------------------------------ | ---------------------- | -------------------------------------- |
-| `(public)`    | `/`                                                          | Marketing landing page | No layout (inherits root)              |
-| `(auth)`      | `/login`, `/register`, `/forgot-password`, `/reset-password` | Auth flows             | Centered card with branding            |
-| `(protected)` | `/dashboard/*`                                               | App shell (auth-gated) | Sidebar + header (SidebarProvider)     |
+| Group         | Path                                                         | Purpose                | Layout                             |
+| ------------- | ------------------------------------------------------------ | ---------------------- | ---------------------------------- |
+| `(public)`    | `/`                                                          | Marketing landing page | No layout (inherits root)          |
+| `(auth)`      | `/login`, `/register`, `/forgot-password`, `/reset-password` | Auth flows             | Centered card with branding        |
+| `(protected)` | `/dashboard/*`                                               | App shell (auth-gated) | Sidebar + header (SidebarProvider) |
 
 ### Server/Client Split Pattern
 

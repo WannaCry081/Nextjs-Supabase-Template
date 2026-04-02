@@ -3,12 +3,16 @@ import { eq } from "drizzle-orm";
 import { profiles } from "@/drizzle/schemas";
 import { db } from "@/lib/drizzle/db";
 import { apiResponse } from "@/lib/response";
+import { rateLimit } from "@/lib/ratelimit";
 import { requireAuth } from "@/lib/guards/auth.guard";
 
 import { HttpStatus } from "@/constants/http-status.constant";
 
 export async function GET() {
   try {
+    const rateLimited = await rateLimit("api");
+    if (rateLimited) return rateLimited;
+
     const { user, error } = await requireAuth();
     if (error) return error;
 

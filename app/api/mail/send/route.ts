@@ -2,6 +2,7 @@ import { z } from "zod";
 import { Resend } from "resend";
 
 import { apiResponse } from "@/lib/response";
+import { rateLimit } from "@/lib/ratelimit";
 import { requireAuth } from "@/lib/guards/auth.guard";
 
 import { HttpStatus } from "@/constants/http-status.constant";
@@ -19,6 +20,9 @@ const emailSchema = z.object({
 
 export async function POST(req: Request) {
   try {
+    const rateLimited = await rateLimit("email");
+    if (rateLimited) return rateLimited;
+
     const { error } = await requireAuth();
     if (error) return error;
 
