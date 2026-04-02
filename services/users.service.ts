@@ -5,7 +5,11 @@ import { API_ROUTES } from "@/constants/routes.constant";
 
 export const usersService = {
   me: async (): Promise<SelectProfile | null> => {
-    const response = await axiosInstance.get(API_ROUTES.USERS.ME);
-    return response.data;
+    try {
+      const response = await axiosInstance.get<{ data: SelectProfile | null }>(API_ROUTES.USERS.ME);
+      return response.data.data ?? null;
+    } catch {
+      return null;
+    }
   },
 };

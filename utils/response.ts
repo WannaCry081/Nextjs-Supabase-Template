@@ -12,14 +12,13 @@ export function apiResponse<T>(prop: ApiResponseProp<T>): NextResponse {
   const { data, status, message } = prop;
 
   const success = status >= 200 && status < 300;
-  const error = getStatusText(status);
 
   return NextResponse.json(
     {
       success,
       data,
       message,
-      error,
+      ...(success ? {} : { error: getStatusText(status) }),
     },
     { status }
   );
