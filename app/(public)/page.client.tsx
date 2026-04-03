@@ -148,7 +148,7 @@ export const PageClient = () => {
 
       <footer className="border-t border-border py-6">
         <div className="max-w-2xl mx-auto px-4 text-xs text-muted-foreground flex justify-between">
-          <span>NextBase</span>
+          <span>&copy; {new Date().getFullYear()} WannaCry081</span>
           <Link
             href="https://github.com/wannacry081/nextjs-supabase-template"
             target="_blank"
