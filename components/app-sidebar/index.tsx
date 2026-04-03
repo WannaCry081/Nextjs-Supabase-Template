@@ -22,6 +22,7 @@ import { APP_SIDEBAR_ITEMS } from "@/constants/app-sidebar-items.constant";
 
 import { getSupabaseClient } from "@/lib/supabase/client";
 import { useRouter } from "nextjs-toploader/app";
+import { toast } from "sonner";
 
 import { useAuth } from "@/hooks/use-auth";
 
@@ -32,8 +33,13 @@ export const AppSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) =
   const { profile, isLoading } = useAuth();
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    router.push("/");
+    try {
+      await supabase.auth.signOut();
+      router.push("/");
+    } catch (error) {
+      console.error("Sign out failed:", error);
+      toast.error("Sign out failed", { description: "Please try again." });
+    }
   };
 
   return (
