@@ -13,20 +13,20 @@ pnpm dev                      # http://localhost:3000
 
 ## Commands
 
-| Task | Command |
-|------|---------|
-| Dev server | `pnpm dev` |
-| Build | `pnpm build` |
-| Lint | `pnpm lint` (fix: `pnpm lint:fix`) |
-| Format | `pnpm format` |
-| Unit tests | `pnpm test:unit` |
-| E2E tests | `pnpm test:e2e` |
-| DB push schema | `pnpm db:push` |
-| DB generate migration | `pnpm db:migrate <name>` |
-| DB apply migrations | `pnpm db:update` |
-| DB studio | `pnpm db:studio` |
-| Docs dev | `pnpm docs:dev` |
-| All parallel (app+docs+studio) | `pnpm start:all` |
+| Task                           | Command                            |
+| ------------------------------ | ---------------------------------- |
+| Dev server                     | `pnpm dev`                         |
+| Build                          | `pnpm build`                       |
+| Lint                           | `pnpm lint` (fix: `pnpm lint:fix`) |
+| Format                         | `pnpm format`                      |
+| Unit tests                     | `pnpm test:unit`                   |
+| E2E tests                      | `pnpm test:e2e`                    |
+| DB push schema                 | `pnpm db:push`                     |
+| DB generate migration          | `pnpm db:migrate <name>`           |
+| DB apply migrations            | `pnpm db:update`                   |
+| DB studio                      | `pnpm db:studio`                   |
+| Docs dev                       | `pnpm docs:dev`                    |
+| All parallel (app+docs+studio) | `pnpm start:all`                   |
 
 ## Tech Stack
 
@@ -36,11 +36,11 @@ Next.js 16 (App Router) · React 19 · TypeScript 5.9 (strict) · Supabase Auth 
 
 ### Route Groups
 
-| Group | URL examples | Layout | Auth |
-|-------|-------------|--------|------|
-| `app/(public)/` | `/` | Root layout | None |
-| `app/(auth)/` | `/login`, `/register`, `/forgot-password`, `/reset-password` | Centered card | None |
-| `app/(protected)/` | `/dashboard/*` | Sidebar shell | Required (middleware) |
+| Group              | URL examples                                                 | Layout        | Auth                  |
+| ------------------ | ------------------------------------------------------------ | ------------- | --------------------- |
+| `app/(public)/`    | `/`                                                          | Root layout   | None                  |
+| `app/(auth)/`      | `/login`, `/register`, `/forgot-password`, `/reset-password` | Centered card | None                  |
+| `app/(protected)/` | `/dashboard/*`                                               | Sidebar shell | Required (middleware) |
 
 ### Server/Client Split (mandatory for interactive pages)
 
@@ -93,17 +93,17 @@ components/providers/ → React context providers (registered in root layout)
 
 ### File Naming — kebab-case for ALL files
 
-| Category | Pattern | Example |
-|----------|---------|---------|
-| Components | `component-name.tsx` | `password-input.tsx` |
-| Client pages | `page.client.tsx` | `app/(auth)/login/page.client.tsx` |
-| Hooks | `use-hook-name.ts` | `hooks/use-auth.ts` |
-| Services | `name.service.ts` | `services/users.service.ts` |
-| Query options | `name.query.ts` | `queries/user.query.ts` |
-| Constants | `name.constant.ts` | `constants/seo.constant.ts` |
-| DB schemas | `name.schema.ts` | `drizzle/schemas/profiles/profiles.schema.ts` |
-| Zod schemas | `name.schema.ts` | `schemas/auth.schema.ts` |
-| Types | `name.types.ts` | `types/drizzle.types.ts` |
+| Category      | Pattern              | Example                                       |
+| ------------- | -------------------- | --------------------------------------------- |
+| Components    | `component-name.tsx` | `password-input.tsx`                          |
+| Client pages  | `page.client.tsx`    | `app/(auth)/login/page.client.tsx`            |
+| Hooks         | `use-hook-name.ts`   | `hooks/use-auth.ts`                           |
+| Services      | `name.service.ts`    | `services/users.service.ts`                   |
+| Query options | `name.query.ts`      | `queries/user.query.ts`                       |
+| Constants     | `name.constant.ts`   | `constants/seo.constant.ts`                   |
+| DB schemas    | `name.schema.ts`     | `drizzle/schemas/profiles/profiles.schema.ts` |
+| Zod schemas   | `name.schema.ts`     | `schemas/auth.schema.ts`                      |
+| Types         | `name.types.ts`      | `types/drizzle.types.ts`                      |
 
 ### Import Order (separated by blank lines)
 
@@ -145,16 +145,16 @@ Prettier: semicolons, double quotes, trailing commas `es5`, 100 char width.
 
 ## Environment Variables
 
-| Variable | Required | Purpose |
-|----------|----------|---------|
-| `DATABASE_URL` | Yes | PostgreSQL connection string |
-| `NEXT_PUBLIC_SUPABASE_URL` | Yes | Supabase project URL |
-| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Yes | Supabase anon key |
-| `NEXT_PUBLIC_SITE_URL` | No | App URL (defaults to `http://localhost:3000`) |
-| `RESEND_API_KEY` | No | Email sending (Resend) |
-| `RESEND_EMAIL_FROM` | No | Sender email address |
-| `UPSTASH_REDIS_REST_URL` | No | Rate limiting (Upstash Redis) |
-| `UPSTASH_REDIS_REST_TOKEN` | No | Rate limiting token |
+| Variable                               | Required | Purpose                                       |
+| -------------------------------------- | -------- | --------------------------------------------- |
+| `DATABASE_URL`                         | Yes      | PostgreSQL connection string                  |
+| `NEXT_PUBLIC_SUPABASE_URL`             | Yes      | Supabase project URL                          |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Yes      | Supabase anon key                             |
+| `NEXT_PUBLIC_SITE_URL`                 | No       | App URL (defaults to `http://localhost:3000`) |
+| `RESEND_API_KEY`                       | No       | Email sending (Resend)                        |
+| `RESEND_EMAIL_FROM`                    | No       | Sender email address                          |
+| `UPSTASH_REDIS_REST_URL`               | No       | Rate limiting (Upstash Redis)                 |
+| `UPSTASH_REDIS_REST_TOKEN`             | No       | Rate limiting token                           |
 
 Optional services degrade gracefully when env vars are not set.
 
