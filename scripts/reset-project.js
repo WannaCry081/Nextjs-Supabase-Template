@@ -83,7 +83,8 @@ async function main() {
   console.log("✔ Initialized git repository");
 
   // 5. Clean up — remove this script and the old reset.bash if present
-  const selfPath = __filename;
+  // Use cwd-based path since __filename still points to the pre-rename location
+  const selfPath = path.join(process.cwd(), "scripts", "reset-project.js");
   if (fs.existsSync(selfPath)) {
     fs.unlinkSync(selfPath);
   }
