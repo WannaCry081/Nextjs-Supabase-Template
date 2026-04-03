@@ -8,6 +8,6 @@ export const metadata = buildMetadata({
   path: "/forgot-password",
 });
 
-export default async function Page() {
+export default function Page() {
   return <PageClient />;
 }

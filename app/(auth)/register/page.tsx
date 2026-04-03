@@ -8,6 +8,6 @@ export const metadata = buildMetadata({
   path: "/register",
 });
 
-export default async function Page() {
+export default function Page() {
   return <PageClient />;
 }

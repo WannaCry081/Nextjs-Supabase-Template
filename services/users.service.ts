@@ -8,7 +8,8 @@ export const usersService = {
     try {
       const response = await axiosInstance.get<{ data: SelectProfile | null }>(API_ROUTES.USERS.ME);
       return response.data.data ?? null;
-    } catch {
+    } catch (error) {
+      console.error("Failed to fetch user profile:", error);
       return null;
     }
   },

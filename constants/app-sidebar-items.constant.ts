@@ -9,6 +9,8 @@ import {
   UsersIcon,
 } from "lucide-react";
 
+// Example sidebar items — replace with your own pages and routes.
+// Items with url: "#" are placeholders. Update them when you add real pages.
 export const APP_SIDEBAR_ITEMS = {
   platform: {
     title: "Platform",
@@ -31,6 +33,7 @@ export const APP_SIDEBAR_ITEMS = {
     ],
   },
   drawer: {
+    title: "Navigation",
     items: [
       {
         title: "Dashboard",
