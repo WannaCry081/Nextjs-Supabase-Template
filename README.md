@@ -1,5 +1,7 @@
 # NextBase
 
+![NextBase Browser Image](/public/nextbase-template.png)
+
 A production-ready full-stack starter built with **Next.js 16**, **Supabase**, **Drizzle ORM**, and **TypeScript**.
 
 ## Tech Stack
