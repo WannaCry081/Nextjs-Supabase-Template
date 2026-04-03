@@ -28,6 +28,8 @@ pnpm dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
+> **Note:** The dashboard sidebar fetches the user's profile from a `profiles` table. You'll need a Supabase database trigger to auto-create a `profiles` row when a new user signs up. See the [Getting Started guide](./docs/overview.md) for details.
+
 ## Environment
 
 Copy `.env.example` to `.env` and configure:

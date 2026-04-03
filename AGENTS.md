@@ -996,7 +996,7 @@ import Image from "next/image";
 
 // 2. Third-party libraries
 import { useQuery } from "@tanstack/react-query";
-import { z } from "zod/v4";
+import { z } from "zod";
 import { useForm } from "react-hook-form";
 
 // 3. Internal utilities and lib
@@ -1122,7 +1122,7 @@ const { data: profile, isLoading } = useQuery(profileQueryOptions);
 ```typescript
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod/v4";
+import { z } from "zod";
 
 const schema = z.object({
   email: z.email(),

@@ -275,6 +275,30 @@ pnpm db:update            # Apply migrations
 pnpm db:studio            # Visual editor
 ```
 
+### Profiles trigger
+
+The dashboard fetches the user's profile from the `profiles` table. To auto-create a profile row when a new user signs up, add this trigger in the Supabase SQL Editor:
+
+```sql
+-- Auto-create a profiles row when a new user signs up
+create or replace function public.handle_new_user()
+returns trigger as $$
+begin
+  insert into public.profiles (id, email, name)
+  values (
+    new.id,
+    new.email,
+    coalesce(new.raw_user_meta_data ->> 'name', split_part(new.email, '@', 1))
+  );
+  return new;
+end;
+$$ language plpgsql security definer;
+
+create or replace trigger on_auth_user_created
+  after insert on auth.users
+  for each row execute function public.handle_new_user();
+```
+
 ## Email (Resend)
 
 Optional transactional email via the `/api/mail/send` endpoint. Requires `RESEND_API_KEY` and `RESEND_EMAIL_FROM` environment variables. Returns "Email service not configured" when keys are missing.
