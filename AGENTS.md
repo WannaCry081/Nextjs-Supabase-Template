@@ -1,12 +1,12 @@
 # AGENTS.md
 
-Developer guide for working with your cloned Next.js + Supabase project. This guide outlines the project structure, conventions, patterns, and workflows to help you understand and extend the starter template.
+Developer guide for working with your cloned NextBase project. This guide outlines the project structure, conventions, patterns, and workflows to help you understand and extend the starter template.
 
 ## Project Overview
 
 ### What You Have
 
-You've cloned a full-stack starter built on Next.js + Supabase + Drizzle ORM, with a separate VitePress docs site:
+You've cloned a full-stack starter built on NextBase (Next.js + Supabase + Drizzle ORM), with a separate VitePress docs site:
 
 - **Included features:** Authentication flows, protected routes, dashboard shell, API routes, and CI pipeline for lint/unit/e2e/build
 - **Key directories:** `app/(auth)/*`, `app/(protected)/*`, `app/api/*`, `.github/workflows/*`
@@ -59,7 +59,7 @@ To develop with this template, ensure you have:
 
 ### Environment Configuration
 
-Before running the project, configure these environment variables in `.env.local` or `.env`:
+Before running the project, configure these environment variables in `.env`:
 
 ```bash
 DATABASE_URL                           # Supabase PostgreSQL connection string
@@ -72,7 +72,7 @@ UPSTASH_REDIS_REST_URL                 # Upstash Redis URL (for rate limiting)
 UPSTASH_REDIS_REST_TOKEN               # Upstash Redis token (for rate limiting)
 ```
 
-Copy `.env.example` to `.env.local` and fill in your values. See:
+Copy `.env.example` to `.env` and fill in your values. See:
 
 - Database: `lib/drizzle/db.ts`, `config/drizzle.config.ts`
 - Auth: `lib/supabase/client.ts`, `lib/supabase/server.ts`
@@ -83,7 +83,7 @@ Copy `.env.example` to `.env.local` and fill in your values. See:
 
 ```bash
 pnpm install
-cp .env.example .env.local
+cp .env.example .env
 # Fill in your environment variables
 pnpm start:development
 ```
@@ -100,7 +100,7 @@ pnpm start:all
 
 The initial migration creates a `profiles` table. To set up your database:
 
-1. Connect your Supabase PostgreSQL URL in `.env.local`
+1. Connect your Supabase PostgreSQL URL in `.env`
 2. Run `pnpm db:push` to apply migrations
 3. (Optional) Add seed data via SQL, Drizzle Studio, or a custom script
 
@@ -292,7 +292,7 @@ No deployment automation is currently configured. The CI validates code quality 
 
 ### “Build fails with env errors or runtime crashes”
 
-- Verify required env vars in `.env.local`/`.env` and in CI secrets.
+- Verify required env vars in `.env` and in CI secrets.
 - Check usage points: `lib/supabase/*`, `lib/drizzle/db.ts`, `app/api/mail/send/route.ts`.
 
 ### “Playwright fails locally”
@@ -637,7 +637,7 @@ export const config = {
 import { buildMetadata } from "@/lib/seo";
 
 export const metadata = buildMetadata({
-  title: "Dashboard", // → "Dashboard | Next.js Supabase Template"
+  title: "Dashboard", // → "Dashboard | NextBase"
   description: "Your dashboard",
   path: "/dashboard", // canonical URL
   noIndex: false, // robots indexing
