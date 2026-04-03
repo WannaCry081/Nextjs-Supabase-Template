@@ -3,35 +3,31 @@
 layout: home
 
 hero:
-  name: "Next.js Supabase"
-  text: "Template"
-  tagline: "A product-ready Next.js Supabase template"
+  name: "NextBase"
+  text: "Starter Template"
+  tagline: "Production-ready full-stack template with authentication, database, and deployment"
   image:
     src: logo.png
-    alt: NextjsSupabaseLogo
+    alt: NextBase
   actions:
     - theme: brand
-      text: Getting Started
+      text: Get Started
       link: /overview
     - theme: alt
-      text: Visit Page
+      text: View Demo
       link: http://localhost:3000/
 
 features:
-  - title: Supabase Integration
-    details: Supabase authentication and CRUD operations with Drizzle ORM
+  - title: Authentication
+    details: Email/password + OAuth with pre-built login, register, and password reset flows
   - title: Route Protection
-    details: Proxy-based session refresh and protected route redirects
-  - title: Authentication UI
-    details: Pre-built authentication UI with modern design patterns
-  - title: Code Quality
-    details: ESLint and Prettier for code quality
-  - title: Documentation
-    details: VitePress documentation site included and customizable
-  - title: Docker Ready
-    details: Docker containerized for seamless deployment
-  - title: Email Management
-    details: Resend email management system
-  - title: CI/CD Workflows
-    details: GitHub Actions for CI/CD workflows
+    details: Middleware-based session management with automatic redirects for protected routes
+  - title: Database & ORM
+    details: Drizzle ORM with PostgreSQL, type-safe queries, migrations, and Drizzle Studio
+  - title: Component Library
+    details: Shadcn/ui + Radix primitives with Tailwind CSS v4 and sidebar navigation shell
+  - title: API Patterns
+    details: Consistent response format, auth guards, rate limiting, and centralized error handling
+  - title: Developer Experience
+    details: TypeScript strict mode, ESLint, Prettier, Vitest, Playwright, Docker, and CI/CD
 ---
