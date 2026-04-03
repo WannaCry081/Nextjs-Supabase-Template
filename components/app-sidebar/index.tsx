@@ -47,7 +47,7 @@ export const AppSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) =
                   <Command className="size-4" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">Template</span>
+                  <span className="truncate font-medium">NextBase</span>
                   <span className="truncate text-xs">Next.js + Supabase</span>
                 </div>
               </Link>
@@ -57,7 +57,7 @@ export const AppSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) =
       </SidebarHeader>
       <SidebarContent>
         <NavItems {...APP_SIDEBAR_ITEMS.platform} />
-        <NavDrawer items={APP_SIDEBAR_ITEMS.drawer.items} />
+        <NavDrawer title={APP_SIDEBAR_ITEMS.drawer.title} items={APP_SIDEBAR_ITEMS.drawer.items} />
         <NavItems {...APP_SIDEBAR_ITEMS.secondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>

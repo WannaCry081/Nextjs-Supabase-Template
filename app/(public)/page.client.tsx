@@ -31,7 +31,7 @@ export const PageClient = () => {
       <nav className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
           <div className="font-semibold tracking-tight text-sm sm:text-base">
-            Next.js Supabase Template
+            NextBase
           </div>
 
           <div className="hidden sm:flex items-center gap-6 md:gap-8 text-xs sm:text-sm">
