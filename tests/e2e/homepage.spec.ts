@@ -9,8 +9,8 @@ test.describe("Home Page", () => {
   test("should display hero content", async ({ page }) => {
     await page.goto("/");
 
-    await expect(page.locator("h1")).toBeVisible();
-    await expect(page.locator("h1")).toContainText("Next.js + Supabase");
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("Next.js + Supabase");
   });
 
   test("should have navigation with auth links", async ({ page }) => {
@@ -32,11 +32,11 @@ test.describe("Home Page", () => {
     // Mobile
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto("/");
-    await expect(page.locator("h1")).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
 
     // Desktop
     await page.setViewportSize({ width: 1280, height: 720 });
-    await expect(page.locator("h1")).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
   });
 });
 
@@ -80,4 +80,3 @@ test.describe("API Health", () => {
     expect(body.data.status).toBe("ok");
   });
 });
-
