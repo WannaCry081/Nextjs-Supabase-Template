@@ -3,6 +3,8 @@
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
+import { ModeToggle } from "@/components/ui/mode-toggle";
+
 import { useAuth } from "@/hooks/use-auth";
 
 const includes = [
@@ -56,27 +58,30 @@ export const PageClient = () => {
     <div className="min-h-screen bg-background text-foreground flex flex-col">
       <nav className="border-b border-border">
         <div className="max-w-2xl mx-auto px-4 py-4 flex items-center justify-between">
-          <span className="font-mono text-sm">nextbase</span>
-          <div className="flex items-center gap-4 text-sm">
-            {user ? (
-              <Link href="/dashboard">
-                <Button size="sm" variant="outline">
-                  Dashboard
-                </Button>
-              </Link>
-            ) : (
-              <>
-                <Link
-                  href="/login"
-                  className="text-muted-foreground hover:text-foreground transition"
-                >
-                  Login
+          <span className="font-mono text-sm">NextBase</span>
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-4 text-sm">
+              {user ? (
+                <Link href="/dashboard">
+                  <Button size="sm" variant="outline">
+                    Dashboard
+                  </Button>
                 </Link>
-                <Link href="/register">
-                  <Button size="sm">Sign up</Button>
-                </Link>
-              </>
-            )}
+              ) : (
+                <>
+                  <Link
+                    href="/login"
+                    className="text-muted-foreground hover:text-foreground transition"
+                  >
+                    Login
+                  </Link>
+                  <Link href="/register">
+                    <Button size="sm">Sign up</Button>
+                  </Link>
+                </>
+              )}
+            </div>
+            <ModeToggle />
           </div>
         </div>
       </nav>

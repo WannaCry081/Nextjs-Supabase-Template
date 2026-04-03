@@ -13,6 +13,7 @@ pnpm install
 cp .env.example .env
 # Add your Supabase credentials (see Environment below)
 pnpm db:push
+# Apply the profiles trigger via Supabase SQL Editor (see Profiles trigger section)
 pnpm dev
 ```
 
@@ -169,7 +170,7 @@ tests/                  Unit (Vitest) + E2E (Playwright)
 Pre-built auth flows with Zod validation (`schemas/auth.schema.ts`):
 
 - **Login** (`/login`) — Email/password + GitHub/Google OAuth
-- **Register** (`/register`) — Account creation with email verification
+- **Register** (`/register`) — Account creation, redirects to login
 - **Forgot Password** (`/forgot-password`) — Request reset link
 - **Reset Password** (`/reset-password`) — Complete the reset flow
 
@@ -277,21 +278,21 @@ pnpm db:studio            # Visual editor
 
 ### Profiles trigger
 
-The dashboard fetches the user's profile from the `profiles` table. The initial migration (`drizzle/migrations/0000_InitialCreate.sql`) includes a database trigger that auto-creates a `profiles` row when a new user signs up:
+The dashboard fetches the user's profile from the `profiles` table. A database trigger auto-creates a `profiles` row when a new user signs up. Since Drizzle ORM does not support triggers, you must **manually add this trigger** via the [Supabase SQL Editor](https://supabase.com/dashboard/project/_/sql):
 
 ```sql
--- Included in 0000_InitialCreate.sql — applied automatically via pnpm db:push
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS trigger
 LANGUAGE plpgsql
 SECURITY DEFINER SET search_path = ''
 AS $$
 BEGIN
-  INSERT INTO public.profiles (id, email, name)
+  INSERT INTO public.profiles (id, name, email, image_url)
   VALUES (
     new.id,
-    new.email,
-    coalesce(new.raw_user_meta_data ->> 'name', split_part(new.email, '@', 1))
+    new.raw_user_meta_data ->> 'name',
+    new.raw_user_meta_data ->> 'email',
+    new.raw_user_meta_data ->> 'avatar_url'
   );
   RETURN new;
 END;
@@ -302,7 +303,7 @@ CREATE TRIGGER on_auth_user_created
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 ```
 
-This trigger is applied automatically when you run `pnpm db:push`. No manual SQL Editor step is needed.
+> **Note:** `pnpm db:push` only syncs tables and columns from your Drizzle TypeScript schemas — it does not create triggers or functions. You must apply the trigger separately after every `db:push`.
 
 ## Email (Resend)
 

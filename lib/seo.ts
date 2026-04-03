@@ -31,7 +31,7 @@ export function buildMetadata(props: BuildMetadataProps): Metadata {
     metadataBase: new URL(SITE_URL),
 
     icons: {
-      icon: "/favicon.ico",
+      icon: "/public/favicon.ico",
     },
 
     openGraph: {
