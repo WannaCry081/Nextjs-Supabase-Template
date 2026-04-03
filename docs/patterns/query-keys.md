@@ -1,6 +1,6 @@
-# Query Keys & Caching
+# Query Keys
 
-Structure TanStack React Query cache keys hierarchically for smart invalidation and consistent data management.
+Hierarchical cache keys for TanStack React Query with smart invalidation.
 
 ## The Problem
 
@@ -80,29 +80,6 @@ export function UserProfile() {
     </div>
   );
 }
-```
-
-### With Context Provider
-
-```typescript
-// components/providers/user-profile-provider.tsx
-"use client";
-
-import { createContext } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { getUserQueryOptions } from "@/queries/user.query";
-
-export const UserProfileContext = createContext(null);
-
-export const UserProfileProvider = ({ children }) => {
-  const { data: profile } = useQuery(getUserQueryOptions());
-
-  return (
-    <UserProfileContext.Provider value={{ profile }}>
-      {children}
-    </UserProfileContext.Provider>
-  );
-};
 ```
 
 ## Cache Invalidation

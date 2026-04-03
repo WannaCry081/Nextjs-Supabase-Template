@@ -1,6 +1,6 @@
-# HTTP Status Codes & Messages
+# HTTP Status Codes
 
-Centralize HTTP status codes, error messages, and success messages for consistent API responses and user-facing communication.
+Centralized status codes and automatic text mapping for API responses.
 
 ## The Problem
 
@@ -31,6 +31,7 @@ export const HttpStatus = {
   UNAUTHORIZED: 401,
   FORBIDDEN: 403,
   NOT_FOUND: 404,
+  TOO_MANY_REQUESTS: 429,
   INTERNAL_SERVER_ERROR: 500,
 } as const;
 ```
@@ -48,6 +49,7 @@ const STATUS_TEXT_MAP: Record<number, string> = {
   [HttpStatus.UNAUTHORIZED]: "Unauthorized",
   [HttpStatus.FORBIDDEN]: "Forbidden",
   [HttpStatus.NOT_FOUND]: "Not Found",
+  [HttpStatus.TOO_MANY_REQUESTS]: "Too Many Requests",
   [HttpStatus.INTERNAL_SERVER_ERROR]: "Internal Server Error",
 };
 
@@ -81,14 +83,11 @@ if (response.status === HttpStatus.UNAUTHORIZED) {
 
 ## Benefits
 
-- **Single Source of Truth**: All status codes and messages defined in one place
-- **Consistency**: Same error messaging across all routes and pages
-- **Type Safety**: TypeScript guarantees valid status codes and messages
-- **Maintainability**: Update messages in one place, everywhere updates automatically
-- **User Experience**: Consistent, clear messaging improves trust
+- **No magic numbers** — Named constants instead of `401`, `500` in code
+- **Self-documenting** — `HttpStatus.UNAUTHORIZED` is clearer than `401`
+- **Single source** — Update status text in one place
 
 ## Related
 
-- [API Response & Error Handling](/patterns/api-response) - Response structure and usage
-- [Auth Guard Pattern](/patterns/auth-guard) - Authentication verification
-- [Form Validation](/patterns/form-validation) - Input validation
+- [API Response](./api-response.md) — Response formatting
+- [Auth Guard](./auth-guard.md) — Authentication verification

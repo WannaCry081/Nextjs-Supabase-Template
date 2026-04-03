@@ -1,6 +1,6 @@
 # Route Definitions
 
-Centralize all routes as constants to eliminate hardcoded URL strings scattered throughout your codebase.
+Centralize all routes as constants. No hardcoded URL strings.
 
 ## The Problem
 
@@ -108,90 +108,12 @@ export function LoginButton() {
 
 ## ✨ Benefits
 
-✅ **No hardcoded strings** - Routes only exist in one place  
-✅ **Easy refactoring** - Change once, updates everywhere  
-✅ **Type-safe** - TypeScript knows all available routes  
-✅ **Auto-generated patterns** - Middleware patterns sync automatically  
-✅ **Self-documenting** - Clear names like `AUTH_ROUTES.LOGIN`
-
-## Related Patterns
-
-- [API Response →](./api-response.md) - Response formatting
-- [Auth Guard →](./auth-guard.md) - Authentication verification
-
-### In Components
-
-```typescript
-import { AUTH_ROUTES } from "@/constants/routes.constant";
-import Link from "next/link";
-
-export function LoginButton() {
-  return (
-    <Link href={AUTH_ROUTES.LOGIN}>
-Sign In
-</Link>
-);
-}
-
-```
-
-## Usage in Client Redirects
-
-```typescript
-// app/(auth)/login/page.client.tsx
-"use client";
-
-import { useRouter } from "next/navigation";
-import { PROTECTED_ROUTES } from "@/constants/routes.constant";
-
-export const PageClient = () => {
-  const router = useRouter();
-
-  const onSuccess = () => {
-    router.replace(PROTECTED_ROUTES.DASHBOARD);
-  };
-
-  // ...
-};
-```
-
-## Adding New Routes
-
-1. Add to appropriate constant object:
-
-```typescript
-// Adding a new protected route
-export const PROTECTED_ROUTES = {
-  DASHBOARD: "/dashboard",
-  SETTINGS: "/settings", // New route
-} as const;
-```
-
-2. Update middleware if needed:
-
-```typescript
-// proxy.ts
-const PROTECTED_ROUTES = ["/dashboard/*", "/settings/*"];
-```
-
-The `PROTECTED_ROUTE_PATTERNS` will automatically include the new pattern.
-
-3. Use in code:
-
-```typescript
-router.push(PROTECTED_ROUTES.SETTINGS);
-```
-
-## Benefits
-
-- **No Magic Strings**: All routes defined as constants
-- **Type Safety**: TypeScript prevents typos in route paths
-- **Single Source of Truth**: Update a route once, everywhere updates
-- **Auto-Sync Patterns**: Middleware patterns stay in sync automatically
-- **Maintainability**: Clear organization by route type
-- **Consistency**: Same routes used everywhere for redirects and navigation
+- **No hardcoded strings** — Routes defined once, used everywhere
+- **Easy refactoring** — Change a path once, all references update
+- **Type-safe** — TypeScript prevents typos in route paths
+- **Auto-generated patterns** — Middleware patterns sync automatically
 
 ## Related
 
-- [Auth Guard Pattern](/patterns/auth-guard) - Route protection
-- [HTTP Status & Messages](/patterns/http-status) - Redirect handling
+- [Auth Guard →](./auth-guard.md) — Route protection
+- [HTTP Status →](./http-status.md) — Status codes

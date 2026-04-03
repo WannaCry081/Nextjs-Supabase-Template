@@ -1,6 +1,6 @@
 # Form Validation
 
-Build type-safe, validated forms with Zod schemas that provide both compile-time and runtime validation.
+Type-safe form schemas with Zod. Define once, validate everywhere.
 
 ## The Problem
 
@@ -272,15 +272,11 @@ const handleLogin = (values: LoginFormValues) => {
 
 ## Benefits
 
-- **Single Source of Truth**: All validation rules defined once
-- **Type Safety**: Form values fully typed from schema
-- **Reusable Schemas**: Common fields shared across forms
-- **Consistency**: Same validation rules everywhere
-- **Maintainability**: Update validation once, affects all forms
-- **Better UX**: Clear error messages from Zod
-- **DRY Principle**: No duplicated validation logic
+- **Single source of truth** — Validation rules defined once in `schemas/auth.schema.ts`
+- **Type-safe** — Form values fully typed from schema via `z.infer`
+- **Consistent UX** — Same validation rules and error messages everywhere
 
 ## Related
 
-- [HTTP Status & Messages](/patterns/http-status) - Error messaging
-- [API Response & Error Handling](/patterns/api-response) - Server-side validation
+- [API Response](./api-response.md) — Server-side error responses
+- [HTTP Status](./http-status.md) — Status codes for validation errors
