@@ -37,6 +37,19 @@ export const NavUser = ({ profile, handleSignOut, isLoading }: NavUserProps) => 
   const imageUrl = profile?.imageUrl || undefined;
   const displayName = profile?.name || "Unknown User";
 
+  const userInfo = (
+    <>
+      <Avatar className="h-8 w-8 rounded-lg">
+        <AvatarImage src={imageUrl} alt={displayName} />
+        <AvatarFallback className="rounded-lg">{displayName.charAt(0)}</AvatarFallback>
+      </Avatar>
+      <div className="grid flex-1 text-left text-sm leading-tight">
+        <span className="truncate font-medium">{displayName}</span>
+        <span className="truncate text-xs">{email}</span>
+      </div>
+    </>
+  );
+
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -46,14 +59,7 @@ export const NavUser = ({ profile, handleSignOut, isLoading }: NavUserProps) => 
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
-              <Avatar className="h-8 w-8 rounded-lg">
-                <AvatarImage src={imageUrl} alt={displayName} />
-                <AvatarFallback className="rounded-lg">{displayName.charAt(0)}</AvatarFallback>
-              </Avatar>
-              <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{displayName}</span>
-                <span className="truncate text-xs">{email}</span>
-              </div>
+              {userInfo}
               <ChevronsUpDown className="ml-auto size-4" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
@@ -65,14 +71,7 @@ export const NavUser = ({ profile, handleSignOut, isLoading }: NavUserProps) => 
           >
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage src={imageUrl} alt={displayName} />
-                  <AvatarFallback className="rounded-lg">{displayName.charAt(0)}</AvatarFallback>
-                </Avatar>
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">{displayName}</span>
-                  <span className="truncate text-xs">{email}</span>
-                </div>
+                {userInfo}
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
