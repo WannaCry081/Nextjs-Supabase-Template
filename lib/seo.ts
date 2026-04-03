@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 
-// Constants
 import { SITE_NAME, SITE_URL, DEFAULT_TITLE, DEFAULT_DESCRIPTION } from "@/constants/seo.constant";
 
 interface BuildMetadataProps {
@@ -31,7 +30,7 @@ export function buildMetadata(props: BuildMetadataProps): Metadata {
     metadataBase: new URL(SITE_URL),
 
     icons: {
-      icon: "/public/favicon.ico",
+      icon: "favicon.ico",
     },
 
     openGraph: {
