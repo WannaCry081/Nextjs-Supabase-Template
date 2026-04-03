@@ -60,6 +60,7 @@ const eslintConfig = defineConfig([
     "node_modules/**",
     "components/ui/**",
     "drizzle/migrations/**",
+    "scripts/**",
   ]),
 ]);
 

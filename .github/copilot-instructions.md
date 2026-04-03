@@ -44,14 +44,14 @@ Next.js 16 (App Router) · React 19 · TypeScript 5.9 (strict) · Supabase Auth 
 
 ### Server/Client Split (mandatory for interactive pages)
 
-```
+```text
 app/(auth)/login/page.tsx         ← Server Component (thin entry, metadata)
 app/(auth)/login/page.client.tsx  ← "use client" (forms, hooks, state)
 ```
 
 ### Data Fetching Flow
 
-```
+```text
 Service (services/*.service.ts)     → axios wrapper, isolates errors, returns typed data or null
   ↓
 Query Options (queries/*.query.ts)  → TanStack queryOptions with hierarchical keys
@@ -82,7 +82,7 @@ All responses use `apiResponse()` from `lib/response.ts` → `{ success, data, e
 
 ### Component Hierarchy
 
-```
+```text
 components/ui/       → Shadcn/Radix primitives — DO NOT MODIFY
 components/shared/   → Reusable wrappers (imports from ui/ only)
 components/app-sidebar/ & future components/features/*  → Domain-specific
