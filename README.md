@@ -1,186 +1,163 @@
-# Next.js + Supabase Template
+# NextBase
 
-A full-stack starter template with **Next.js 16**, **Supabase** authentication & database, and **Drizzle ORM**. Production-ready with pre-configured authentication, database migrations, testing, and deployment setup.
+A production-ready full-stack starter built with **Next.js 16**, **Supabase**, **Drizzle ORM**, and **TypeScript**.
 
-## 📦 What's Included
+## Tech Stack
 
-- **Frontend**: Next.js 16 (App Router) + React 19 + TypeScript
-- **Authentication**: Supabase Auth (email/password + OAuth)
-- **Database**: PostgreSQL via Supabase + Drizzle ORM
-- **UI**: Shadcn/Radix components + Tailwind CSS v4
-- **State Management**: TanStack React Query + Zustand
-- **Forms**: react-hook-form + Zod validation
-- **Testing**: Vitest (unit) + Playwright (E2E)
-- **Code Quality**: ESLint, Prettier, TypeScript strict mode
-- **Deployment**: Docker + Docker Compose
-- **Documentation**: VitePress site included
-- **CI/CD**: GitHub Actions workflows
+| Category        | Technology                                    |
+| --------------- | --------------------------------------------- |
+| Framework       | Next.js 16 (App Router), React 19, TypeScript |
+| Auth & Database | Supabase (email/password, OAuth), PostgreSQL  |
+| ORM             | Drizzle ORM (type-safe queries, migrations)   |
+| UI              | Shadcn/ui, Radix, Tailwind CSS v4             |
+| State           | TanStack React Query, Zustand                 |
+| Forms           | react-hook-form, Zod                          |
+| Testing         | Vitest (unit), Playwright (E2E)               |
+| Docs            | VitePress                                     |
+| Deploy          | Docker, GitHub Actions CI                     |
 
-## 🚀 Installation
-
-### 1. Clone & Install
+## Quick Start
 
 ```bash
-git clone https://github.com/WannaCry081/Nextjs-Supabase-Template.git
-cd nextjs-supabase-template
 pnpm install
+cp .env.example .env
+# Add your Supabase credentials (see Environment below)
+pnpm db:push
+pnpm dev
 ```
 
-### 2. Environment Setup
+Open [http://localhost:3000](http://localhost:3000).
 
-```bash
-cp .env.example .env.local
-```
+## Environment
 
-Fill in `.env.local` with your Supabase credentials:
+Copy `.env.example` to `.env` and configure:
 
-```bash
-# Get from Supabase > Settings > API
-NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your-anon-key
+| Variable                               | Required | Source                                           |
+| -------------------------------------- | -------- | ------------------------------------------------ |
+| `DATABASE_URL`                         | Yes      | Supabase > Settings > Database                   |
+| `NEXT_PUBLIC_SUPABASE_URL`             | Yes      | Supabase > Settings > API                        |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Yes      | Supabase > Settings > API                        |
+| `NEXT_PUBLIC_SITE_URL`                 | —        | Defaults to `http://localhost:3000`              |
+| `RESEND_API_KEY`                       | —        | [Resend](https://resend.com) for email           |
+| `RESEND_EMAIL_FROM`                    | —        | Sender address                                   |
+| `UPSTASH_REDIS_REST_URL`               | —        | [Upstash](https://upstash.com) for rate limiting |
+| `UPSTASH_REDIS_REST_TOKEN`             | —        | Upstash token                                    |
 
-# Get from Supabase > Settings > Database > Connection String (URI)
-DATABASE_URL=postgresql://postgres:password@db.your-project.supabase.co:5432/postgres
+> **Offline development:** Run `supabase start` for a local Supabase instance. See the [full guide](./docs/overview.md#local-development-offline).
 
-# Optional: Resend for emails
-RESEND_API_KEY=your-resend-key
-RESEND_EMAIL_FROM=noreply@example.com
-
-# App URL (default: http://localhost:3000)
-NEXT_PUBLIC_SITE_URL=http://localhost:3000
-```
-
-### 3. Initialize Database & Run
-
-```bash
-pnpm db:push                # Push migrations to Supabase
-pnpm dev                    # Start dev server at http://localhost:3000
-```
-
-## 📚 Available Commands
+## Commands
 
 ```bash
 # Development
-pnpm dev                    # Dev server
-pnpm start:all              # App + docs + DB studio in parallel
+pnpm dev                    # Start dev server
 pnpm build                  # Production build
-pnpm start                  # Run production build
+pnpm start                  # Serve production build
+pnpm start:all              # Dev + docs + Drizzle Studio
 
 # Database
-pnpm db:push                # Apply migrations
-pnpm db:migrate <name>      # Generate migration
+pnpm db:push                # Push schema to database
+pnpm db:migrate <name>      # Generate a migration
+pnpm db:update              # Apply pending migrations
 pnpm db:studio              # Open Drizzle Studio
 
-# Code Quality
-pnpm lint                   # Check linting
-pnpm lint:fix               # Fix lint errors
-pnpm format                 # Format code
+# Quality
+pnpm lint                   # ESLint
+pnpm lint:fix               # Auto-fix lint issues
+pnpm format                 # Prettier
 
 # Testing
-pnpm test:unit              # Unit tests (Vitest)
-pnpm test:e2e               # E2E tests (Playwright)
-pnpm test:e2e:debug         # Debug E2E tests
+pnpm test:unit              # Vitest
+pnpm test:e2e               # Playwright (Chromium, Firefox, WebKit)
+pnpm test:e2e:ui            # Playwright with UI
+pnpm test:e2e:debug         # Debug mode
 
 # Documentation
-pnpm docs:dev               # VitePress dev server
-pnpm docs:build             # Build docs
+pnpm docs:dev               # VitePress dev server (port 4000)
+pnpm docs:build             # Build docs site
+pnpm docs:preview           # Preview production docs
 ```
 
-## 📁 Project Structure
+## Project Structure
 
 ```text
-app/                    # Next.js pages & API routes
-  (auth)/              # Login, register, password reset
-  (protected)/         # Dashboard (auth-gated)
-  (public)/            # Landing page
-  api/                 # API endpoints
-components/            # React components
-  ui/                  # Shadcn/Radix primitives
-  shared/              # Reusable components
-  providers/           # Context providers
-lib/                   # Utilities
-  supabase/           # Auth + database clients
-  drizzle/            # ORM setup
-hooks/                # Custom React hooks
-drizzle/              # Database schemas & migrations
-services/             # API wrappers
-queries/              # React Query options
-types/                # TypeScript definitions
-constants/            # App constants
-tests/                # Unit & E2E tests
-docs/                 # VitePress documentation
+app/
+├── (auth)/                 # Login, register, password reset
+├── (protected)/            # Dashboard (auth-gated)
+├── (public)/               # Landing page
+└── api/                    # API endpoints
+components/
+├── ui/                     # Shadcn/ui primitives (do not modify)
+├── shared/                 # Reusable components
+├── app-sidebar/            # Sidebar shell
+└── providers/              # Context providers
+lib/
+├── supabase/               # Auth + database clients
+├── drizzle/                # ORM connection
+├── guards/                 # Auth guard (requireAuth)
+├── query/                  # React Query client + keys
+├── response.ts             # API response helper
+├── ratelimit.ts            # Rate limiting (Upstash)
+└── seo.ts                  # Metadata helper
+constants/                  # Routes, HTTP status, sidebar, SEO
+schemas/                    # Zod validation schemas
+services/                   # API client wrappers
+queries/                    # React Query option factories
+hooks/                      # Custom hooks
+drizzle/                    # Database schemas + migrations
+tests/                      # Unit + E2E tests
+docs/                       # VitePress documentation
 ```
 
-Complete structure and patterns documented in **[AGENTS.md](./AGENTS.md)**.
+## Features
 
-## 🔐 Authentication
+- **Authentication** — Email/password + OAuth (GitHub, Google), pre-built forms
+- **Route Protection** — Middleware-based auth with automatic redirects
+- **API Layer** — Consistent responses, auth guards, rate limiting
+- **Database** — Drizzle ORM with migrations, studio, soft deletes
+- **Sidebar Shell** — Collapsible navigation with user menu
+- **Email** — Resend integration (optional)
+- **SEO** — Metadata helper with Open Graph and Twitter cards
+- **Rate Limiting** — Tiered Upstash Redis limits (optional, skipped in dev)
+- **CI/CD** — GitHub Actions for lint, tests, and build
+- **Docker** — Multi-stage production build (Node 22 Alpine)
 
-### Features
-
-- Email/password login & signup
-- OAuth (GitHub, Google)
-- Password reset
-- Protected routes
-
-## 💾 Database
-
-### Schema Management
+## Documentation
 
 ```bash
-# Generate drizzle migration
-pnpm db:migrate AddMyColumn
-
-# Updates a record in the database using Drizzle ORM.
-pnpm db:update
-
-# Apply changes
-pnpm db:push
+pnpm docs:dev     # Start VitePress at http://localhost:4000
 ```
 
-### Migrations
+- **[Getting Started](./docs/overview.md)** — Setup, structure, core features
+- **[Architecture Patterns](./docs/patterns/index.md)** — API response, auth guard, validation, routes, caching, status codes
+- **[AGENTS.md](./AGENTS.md)** — Full developer reference
 
-Auto-generated migrations live in `drizzle/migrations/` as SQL files. Use `pnpm db:studio` for visual DB management.
+## Configuration
 
-## 🧪 Testing
+| File                          | Purpose                                     |
+| ----------------------------- | ------------------------------------------- |
+| `next.config.ts`              | Next.js (React Compiler, standalone output) |
+| `tsconfig.json`               | TypeScript (strict mode)                    |
+| `proxy.ts`                    | Route protection middleware                 |
+| `components.json`             | Shadcn/ui configuration                     |
+| `eslint.config.mjs`           | ESLint (flat config)                        |
+| `.prettierrc`                 | Prettier formatting                         |
+| `config/drizzle.config.ts`    | Drizzle ORM                                 |
+| `config/playwright.config.ts` | Playwright E2E tests                        |
+| `config/vitest.config.mts`    | Vitest unit tests                           |
 
-```bash
-# Unit tests
-pnpm test:unit
+## Resources
 
-# E2E tests (Chromium, Firefox, WebKit)
-pnpm test:e2e
-pnpm test:e2e:ui          # With UI
-```
+| Tool         | Link                                           |
+| ------------ | ---------------------------------------------- |
+| Next.js      | [nextjs.org/docs](https://nextjs.org/docs)     |
+| Supabase     | [supabase.com/docs](https://supabase.com/docs) |
+| Drizzle ORM  | [orm.drizzle.team](https://orm.drizzle.team)   |
+| Shadcn/ui    | [ui.shadcn.com](https://ui.shadcn.com)         |
+| Origin UI    | [originui.com](https://originui.com)           |
+| tweakcn      | [tweakcn.com](https://tweakcn.com)             |
+| Tailwind CSS | [tailwindcss.com](https://tailwindcss.com)     |
+| Upstash      | [upstash.com](https://upstash.com)             |
 
-Tests run on push/PR via GitHub Actions.
+## License
 
-## 🐳 Docker Deployment
-
-```bash
-docker-compose up -d   # Start containerized app
-docker-compose down    # Stop
-```
-
-Requires `.env` file with all variables. Multi-stage build uses Node 22 Alpine for a lean production image.
-
-## 🔧 Configuration Files
-
-| File                 | Purpose                          |
-| -------------------- | -------------------------------- |
-| `tsconfig.json`      | TypeScript (strict mode)         |
-| `next.config.ts`     | Next.js (React Compiler enabled) |
-| `tailwind.config.ts` | Tailwind CSS                     |
-| `proxy.ts`           | Route protection middleware      |
-| `components.json`    | Shadcn/ui config                 |
-
-## 📚 Documentation
-
-- **[AGENTS.md](./AGENTS.md)** — Full developer guide (architecture, patterns, conventions)
-- **[Next.js Docs](https://nextjs.org/docs)** — Framework reference
-- **[Supabase Docs](https://supabase.com/docs)** — Auth & database
-- **[Drizzle ORM](https://orm.drizzle.team)** — Type-safe queries
-- **[Tailwind CSS](https://tailwindcss.com)** — Styling
-
-## 💬 Questions?
-
-See [AGENTS.md](./AGENTS.md) for detailed setup, architecture, and workflow documentation.
+MIT
