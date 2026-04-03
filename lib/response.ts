@@ -17,8 +17,8 @@ export function apiResponse<T>(prop: ApiResponseProp<T>): NextResponse {
   return NextResponse.json(
     {
       success,
-      data,
-      message,
+      data: success ? (data ?? null) : null,
+      ...(message ? { message } : {}),
       ...(success ? {} : { error: getStatusText(status) }),
     },
     { status, headers }

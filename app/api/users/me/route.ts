@@ -25,8 +25,8 @@ export async function GET() {
   } catch (error) {
     console.error("Error fetching user profile:", error);
     return apiResponse({
-      data: "Failed to fetch user profile",
       status: HttpStatus.INTERNAL_SERVER_ERROR,
+      message: "Failed to fetch user profile",
     });
   }
 }

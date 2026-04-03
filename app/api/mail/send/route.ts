@@ -31,8 +31,8 @@ export async function POST(req: Request) {
 
     if (!validation.success) {
       return apiResponse({
-        data: "Invalid request body",
         status: HttpStatus.BAD_REQUEST,
+        message: "Invalid request body",
       });
     }
 
@@ -40,8 +40,8 @@ export async function POST(req: Request) {
 
     if (!RESEND_API_KEY || !RESEND_EMAIL_FROM) {
       return apiResponse({
-        data: "Email service not configured",
         status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: "Email service not configured",
       });
     }
 
@@ -61,8 +61,8 @@ export async function POST(req: Request) {
     console.error("Error sending email:", error);
 
     return apiResponse({
-      data: "Failed to send email",
       status: HttpStatus.INTERNAL_SERVER_ERROR,
+      message: "Failed to send email",
     });
   }
 }

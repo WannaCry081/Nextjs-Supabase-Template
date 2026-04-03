@@ -21,8 +21,8 @@ export async function requireAuth(): Promise<{
       return {
         user: null,
         error: apiResponse({
-          data: authError?.message ?? "Unauthorized",
           status: HttpStatus.UNAUTHORIZED,
+          message: authError?.message ?? "Unauthorized",
         }),
       };
     }
@@ -33,8 +33,8 @@ export async function requireAuth(): Promise<{
     return {
       user: null,
       error: apiResponse({
-        data: "Unauthorized",
         status: HttpStatus.UNAUTHORIZED,
+        message: "Unauthorized",
       }),
     };
   }
