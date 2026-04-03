@@ -1,13 +1,11 @@
 import { NextResponse } from "next/server";
 import { User } from "@supabase/supabase-js";
 
-import { apiResponse } from "@/lib/api-response";
+import { apiResponse } from "@/lib/response";
 import { getSupabaseServer } from "@/lib/supabase/server";
 
 import { HttpStatus } from "@/constants/http-status.constant";
-import { AUTH_ERRORS } from "@/constants/http-error-messages.constant";
 
-/** Verify user authentication */
 export async function requireAuth(): Promise<{
   user: User | null;
   error: NextResponse | null;
@@ -23,8 +21,8 @@ export async function requireAuth(): Promise<{
       return {
         user: null,
         error: apiResponse({
-          data: authError?.message ?? AUTH_ERRORS.UNAUTHORIZED,
           status: HttpStatus.UNAUTHORIZED,
+          message: authError?.message ?? "Unauthorized",
         }),
       };
     }
@@ -35,8 +33,8 @@ export async function requireAuth(): Promise<{
     return {
       user: null,
       error: apiResponse({
-        data: AUTH_ERRORS.UNAUTHORIZED,
         status: HttpStatus.UNAUTHORIZED,
+        message: "Unauthorized",
       }),
     };
   }

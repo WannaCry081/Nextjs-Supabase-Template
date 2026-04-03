@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { toast } from "sonner";
-import { Activity, useTransition } from "react";
+import { useTransition } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -13,7 +13,7 @@ import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/c
 
 import { getSupabaseClient } from "@/lib/supabase/client";
 
-import { type ForgotPasswordFormValues, forgotPasswordSchema } from "@/common/schemas/auth.schema";
+import { type ForgotPasswordFormValues, forgotPasswordSchema } from "@/schemas/auth.schema";
 
 export const PageClient = () => {
   const supabase = getSupabaseClient();
@@ -79,9 +79,7 @@ export const PageClient = () => {
                       aria-invalid={fieldState.invalid}
                       disabled={isPending}
                     />
-                    <Activity mode={fieldState.error ? "visible" : "hidden"}>
-                      <FieldError errors={[fieldState.error]} />
-                    </Activity>
+                    {fieldState.error ? <FieldError errors={[fieldState.error]} /> : null}
                   </Field>
                 )}
               />

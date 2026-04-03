@@ -26,22 +26,23 @@ interface NavDrawerItem {
 }
 
 interface NavDrawerProps extends React.ComponentPropsWithoutRef<typeof SidebarGroup> {
+  title: string;
   items: NavDrawerItem[];
 }
 
-export const NavDrawer = ({ items }: NavDrawerProps) => {
+export const NavDrawer = ({ title, items, ...props }: NavDrawerProps) => {
   return (
-    <SidebarGroup>
-      <SidebarGroupLabel>Platform</SidebarGroupLabel>
+    <SidebarGroup {...props}>
+      <SidebarGroupLabel>{title}</SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => (
           <Collapsible key={item.title} asChild defaultOpen={item.isActive}>
             <SidebarMenuItem>
               <SidebarMenuButton asChild tooltip={item.title}>
-                <a href={item.url}>
+                <Link href={item.url}>
                   <item.icon />
                   <span>{item.title}</span>
-                </a>
+                </Link>
               </SidebarMenuButton>
               {item.subItems?.length ? (
                 <>

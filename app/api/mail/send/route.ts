@@ -1,12 +1,11 @@
 import { z } from "zod";
 import { Resend } from "resend";
 
-import { apiResponse } from "@/lib/api-response";
-
-import { requireAuth } from "@/common/guards/auth.guard";
+import { apiResponse } from "@/lib/response";
+import { rateLimit } from "@/lib/ratelimit";
+import { requireAuth } from "@/lib/guards/auth.guard";
 
 import { HttpStatus } from "@/constants/http-status.constant";
-import { API_ERRORS, EMAIL_ERRORS } from "@/constants/http-error-messages.constant";
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const RESEND_EMAIL_FROM = process.env.RESEND_EMAIL_FROM;
@@ -21,6 +20,9 @@ const emailSchema = z.object({
 
 export async function POST(req: Request) {
   try {
+    const rateLimited = await rateLimit("email");
+    if (rateLimited) return rateLimited;
+
     const { error } = await requireAuth();
     if (error) return error;
 
@@ -29,8 +31,8 @@ export async function POST(req: Request) {
 
     if (!validation.success) {
       return apiResponse({
-        data: API_ERRORS.MISSING_FIELDS,
         status: HttpStatus.BAD_REQUEST,
+        message: "Invalid request body",
       });
     }
 
@@ -38,8 +40,8 @@ export async function POST(req: Request) {
 
     if (!RESEND_API_KEY || !RESEND_EMAIL_FROM) {
       return apiResponse({
-        data: EMAIL_ERRORS.NOT_CONFIGURED,
         status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: "Email service not configured",
       });
     }
 
@@ -59,8 +61,8 @@ export async function POST(req: Request) {
     console.error("Error sending email:", error);
 
     return apiResponse({
-      data: EMAIL_ERRORS.SEND_FAILED,
       status: HttpStatus.INTERNAL_SERVER_ERROR,
+      message: "Failed to send email",
     });
   }
 }

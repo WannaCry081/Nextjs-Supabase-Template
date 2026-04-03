@@ -1,6 +1,6 @@
 # Form Validation
 
-Build type-safe, validated forms with Zod schemas that provide both compile-time and runtime validation.
+Type-safe form schemas with Zod. Define once, validate everywhere.
 
 ## The Problem
 
@@ -19,14 +19,14 @@ if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
 }
 ```
 
-**Solution:** Define schemas once in `common/schemas/auth.schema.ts`.
+**Solution:** Define schemas once in `schemas/auth.schema.ts`.
 
 ## How It Works
 
 Centralized form validation schemas using Zod ensure type-safe, reusable validation across auth forms:
 
 ```typescript
-// common/schemas/auth.schema.ts
+// schemas/auth.schema.ts
 import { z } from "zod";
 
 const emailSchema = z.email("Please enter a valid email address");
@@ -95,7 +95,7 @@ export type ResetPasswordFormValues = z.infer<typeof resetPasswordSchema>;
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { loginSchema, type LoginFormValues } from "@/common/schemas/auth.schema";
+import { loginSchema, type LoginFormValues } from "@/schemas/auth.schema";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
@@ -188,21 +188,21 @@ const onSubmit = async (values: LoginFormValues) => {
       const { error } = await supabase.auth.signInWithPassword(values);
 
       if (error) {
-        toast.error(AUTH_ERRORS.LOGIN_FAILED, {
-          description: AUTH_ERRORS.LOGIN_FAILED_DESC,
+        toast.error("Login failed", {
+          description: "Please check your credentials and try again.",
         });
         return;
       }
 
-      toast.success(AUTH_SUCCESS.LOGIN_SUCCESS, {
-        description: AUTH_SUCCESS.LOGIN_SUCCESS_DESC,
+      toast.success("Welcome back!", {
+        description: "Redirecting to dashboard...",
       });
 
       router.replace(PROTECTED_ROUTES.DASHBOARD);
     } catch (error) {
-      console.error(\"Login error:\", error);
-      toast.error(API_ERRORS.GENERIC, {
-        description: API_ERRORS.GENERIC_DESC,
+      console.error("Login error:", error);
+      toast.error("Something went wrong", {
+        description: "There was an issue processing your request. Please try again later.",
       });
     }
   });
@@ -260,7 +260,7 @@ export const resetPasswordSchema = z
 All schema types are inferred for complete type safety:
 
 ```typescript
-import type { LoginFormValues } from \"@/common/schemas/auth.schema\";
+import type { LoginFormValues } from "@/schemas/auth.schema";
 
 // TypeScript knows the exact shape
 const handleLogin = (values: LoginFormValues) => {
@@ -272,15 +272,11 @@ const handleLogin = (values: LoginFormValues) => {
 
 ## Benefits
 
-- **Single Source of Truth**: All validation rules defined once
-- **Type Safety**: Form values fully typed from schema
-- **Reusable Schemas**: Common fields shared across forms
-- **Consistency**: Same validation rules everywhere
-- **Maintainability**: Update validation once, affects all forms
-- **Better UX**: Clear error messages from Zod
-- **DRY Principle**: No duplicated validation logic
+- **Single source of truth** — Validation rules defined once in `schemas/auth.schema.ts`
+- **Type-safe** — Form values fully typed from schema via `z.infer`
+- **Consistent UX** — Same validation rules and error messages everywhere
 
 ## Related
 
-- [HTTP Status & Messages](/patterns/http-status) - Error messaging
-- [API Response & Error Handling](/patterns/api-response) - Server-side validation
+- [API Response](./api-response.md) — Server-side error responses
+- [HTTP Status](./http-status.md) — Status codes for validation errors

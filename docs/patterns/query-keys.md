@@ -1,6 +1,6 @@
-# Query Keys & Caching
+# Query Keys
 
-Structure TanStack React Query cache keys hierarchically for smart invalidation and consistent data management.
+Hierarchical cache keys for TanStack React Query with smart invalidation.
 
 ## The Problem
 
@@ -23,13 +23,13 @@ queryClient.invalidateQueries({ queryKey: ["profile"] });
 Query keys follow a hierarchical factory pattern for type-safe cache management:
 
 ```typescript
-// lib/query/query-keys.ts
+// lib/query/get-query-keys.ts
 
 /** Centralized TanStack Query cache keys */
-export const queryKeys = {
-  profile: {
-    all: ["profile"] as const,
-    me: () => [...queryKeys.profile.all, "me"] as const,
+export const getQueryKey = {
+  users: {
+    all: ["users"] as const,
+    me: () => [...getQueryKey.users.all, "me"] as const,
   },
 } as const;
 ```
@@ -45,15 +45,15 @@ This structure enables:
 Define query behavior alongside cache keys:
 
 ```typescript
-// queries/profile.query.ts
+// queries/user.query.ts
 import { queryOptions } from "@tanstack/react-query";
-import { queryKeys } from "@/lib/query/query-keys";
-import { profileService } from "@/services/profile.service";
+import { getQueryKey } from "@/lib/query/get-query-keys";
+import { usersService } from "@/services/users.service";
 
-export const getProfileQueryOptions = () =>
+export const getUserQueryOptions = () =>
   queryOptions({
-    queryKey: queryKeys.profile.me(),
-    queryFn: () => profileService.me(),
+    queryKey: getQueryKey.users.me(),
+    queryFn: () => usersService.me(),
   });
 ```
 
@@ -66,10 +66,10 @@ export const getProfileQueryOptions = () =>
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { getProfileQueryOptions } from "@/queries/profile.query";
+import { getUserQueryOptions } from "@/queries/user.query";
 
 export function UserProfile() {
-  const { data: profile, isLoading, error } = useQuery(getProfileQueryOptions());
+  const { data: profile, isLoading, error } = useQuery(getUserQueryOptions());
 
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error loading profile</div>;
@@ -80,29 +80,6 @@ export function UserProfile() {
     </div>
   );
 }
-```
-
-### With Context Provider
-
-```typescript
-// components/providers/user-profile-provider.tsx
-"use client";
-
-import { createContext } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { getProfileQueryOptions } from "@/queries/profile.query";
-
-export const UserProfileContext = createContext(null);
-
-export const UserProfileProvider = ({ children }) => {
-  const { data: profile } = useQuery(getProfileQueryOptions());
-
-  return (
-    <UserProfileContext.Provider value={{ profile }}>
-      {children}
-    </UserProfileContext.Provider>
-  );
-};
 ```
 
 ## Cache Invalidation
@@ -122,9 +99,9 @@ const { mutate: updateProfile } = useMutation({
     return response.json();
   },
   onSuccess: () => {
-    // Invalidate profile cache to refetch on next access
+    // Invalidate users cache to refetch on next access
     queryClient.invalidateQueries({
-      queryKey: queryKeys.profile.all,
+      queryKey: getQueryKey.users.all,
     });
   },
 });
@@ -135,16 +112,16 @@ const { mutate: updateProfile } = useMutation({
 When adding new data types, extend the factory:
 
 ```typescript
-// lib/query/query-keys.ts
-export const queryKeys = {
-  profile: {
-    all: ["profile"] as const,
-    me: () => [...queryKeys.profile.all, "me"] as const,
+// lib/query/get-query-keys.ts
+export const getQueryKey = {
+  users: {
+    all: ["users"] as const,
+    me: () => [...getQueryKey.users.all, "me"] as const,
   },
   posts: {
     all: ["posts"] as const,
-    list: () => [...queryKeys.posts.all, "list"] as const,
-    detail: (id: string) => [...queryKeys.posts.all, "detail", id] as const,
+    list: () => [...getQueryKey.posts.all, "list"] as const,
+    detail: (id: string) => [...getQueryKey.posts.all, "detail", id] as const,
   },
 } as const;
 ```
@@ -155,13 +132,13 @@ Then create corresponding query options:
 // queries/posts.query.ts
 export const getPostsQueryOptions = () =>
   queryOptions({
-    queryKey: queryKeys.posts.list(),
+    queryKey: getQueryKey.posts.list(),
     queryFn: () => postsService.list(),
   });
 
 export const getPostDetailQueryOptions = (id: string) =>
   queryOptions({
-    queryKey: queryKeys.posts.detail(id),
+    queryKey: getQueryKey.posts.detail(id),
     queryFn: () => postsService.detail(id),
   });
 ```
@@ -171,14 +148,14 @@ export const getPostDetailQueryOptions = (id: string) =>
 For a post with comments:
 
 ```typescript
-export const queryKeys = {
+export const getQueryKey = {
   posts: {
-    all: [\"posts\"] as const,
-    list: () => [...queryKeys.posts.all, \"list\"] as const,
-    detail: (id: string) => [...queryKeys.posts.all, \"detail\", id] as const,
+    all: ["posts"] as const,
+    list: () => [...getQueryKey.posts.all, "list"] as const,
+    detail: (id: string) => [...getQueryKey.posts.all, "detail", id] as const,
     comments: {
-      all: (postId: string) => [...queryKeys.posts.detail(postId), \"comments\"] as const,
-      list: (postId: string) => [...queryKeys.posts.comments.all(postId), \"list\"] as const,
+      all: (postId: string) => [...getQueryKey.posts.detail(postId), "comments"] as const,
+      list: (postId: string) => [...getQueryKey.posts.comments.all(postId), "list"] as const,
     },
   },
 } as const;
@@ -188,13 +165,13 @@ Cache invalidation at different levels:
 
 ```typescript
 // Invalidate all posts
-queryClient.invalidateQueries({ queryKey: queryKeys.posts.all });
+queryClient.invalidateQueries({ queryKey: getQueryKey.posts.all });
 
 // Invalidate specific post
-queryClient.invalidateQueries({ queryKey: queryKeys.posts.detail(postId) });
+queryClient.invalidateQueries({ queryKey: getQueryKey.posts.detail(postId) });
 
 // Invalidate post comments only
-queryClient.invalidateQueries({ queryKey: queryKeys.posts.comments.all(postId) });
+queryClient.invalidateQueries({ queryKey: getQueryKey.posts.comments.all(postId) });
 ```
 
 ## Benefits

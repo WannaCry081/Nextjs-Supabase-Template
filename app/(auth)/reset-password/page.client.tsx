@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { toast } from "sonner";
-import { Activity, useTransition } from "react";
+import { useTransition } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -13,7 +13,7 @@ import { PasswordInput } from "@/components/shared/password-input";
 
 import { getSupabaseClient } from "@/lib/supabase/client";
 
-import { resetPasswordSchema, type ResetPasswordFormValues } from "@/common/schemas/auth.schema";
+import { resetPasswordSchema, type ResetPasswordFormValues } from "@/schemas/auth.schema";
 
 export const PageClient = () => {
   const supabase = getSupabaseClient();
@@ -24,6 +24,7 @@ export const PageClient = () => {
     resolver: zodResolver(resetPasswordSchema),
     defaultValues: {
       password: "",
+      confirmPassword: "",
     },
   });
 
@@ -77,9 +78,23 @@ export const PageClient = () => {
                       disabled={isPending}
                       aria-invalid={fieldState.invalid}
                     />
-                    <Activity mode={fieldState.error ? "visible" : "hidden"}>
-                      <FieldError errors={[fieldState.error]} />
-                    </Activity>
+                    {fieldState.error ? <FieldError errors={[fieldState.error]} /> : null}
+                  </Field>
+                )}
+              />
+              <Controller
+                name="confirmPassword"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field>
+                    <FieldLabel htmlFor="confirmPassword">Confirm Password</FieldLabel>
+                    <PasswordInput
+                      {...field}
+                      id="confirmPassword"
+                      disabled={isPending}
+                      aria-invalid={fieldState.invalid}
+                    />
+                    {fieldState.error ? <FieldError errors={[fieldState.error]} /> : null}
                   </Field>
                 )}
               />

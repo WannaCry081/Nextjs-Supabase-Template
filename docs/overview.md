@@ -4,208 +4,198 @@ outline: deep
 
 # Getting Started
 
-Welcome to the **Next.js + Supabase Template**! This is a production-ready starter for building modern full-stack applications with Next.js 16, Supabase authentication, Drizzle ORM, and TanStack Query.
-
-## What's Included
-
-✨ **Frontend**
-
-- Next.js 16 with App Router and route groups
-- Beautifully designed authentication UI with OAuth support
-- Protected routes with proxy-based session management
-- Sidebar navigation with responsive design
-- Modern component library (Shadcn/ui + Radix)
-
-🔐 **Backend & Database**
-
-- Supabase authentication (email/password + OAuth)
-- Drizzle ORM for type-safe database operations
-- Database migrations and Drizzle Studio support
-- Centralized API response handling
-
-🚀 **Developer Experience**
-
-- Type-safe patterns for routes, forms, API responses
-- TanStack Query for data fetching and caching
-- Consistent error handling across the app
-- Comprehensive documentation with examples
-- Docker support for deployment
+A production-ready template with Next.js 16, Supabase, Drizzle ORM, and TanStack Query. Clone, configure, and start building.
 
 ## Quick Start
 
-### Installation
-
 ```bash
-# Install dependencies
 pnpm install
-
-# Create environment file
-cp .env.example .env.local
-
-# Start development server
-pnpm start:development
+cp .env.example .env
+# Add your Supabase credentials (see Environment below)
+pnpm db:push
+pnpm dev
 ```
 
-Visit `http://localhost:3000` and explore the template!
+Visit [http://localhost:3000](http://localhost:3000).
 
-### Environment Setup
+## Environment
 
-Required environment variables (see `.env.example`):
+Required — get from your [Supabase project dashboard](https://supabase.com/dashboard):
 
 ```bash
-# Supabase
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your_anon_key
-DATABASE_URL=your_database_url
-
-# Email (optional)
-RESEND_API_KEY=your_resend_key
-RESEND_EMAIL_FROM=noreply@yourdomain.com
-
-# Site
+DATABASE_URL=postgresql://...
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your-anon-key
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
 ```
 
-## Template Structure
+Optional services (leave empty to disable):
+
+```bash
+# Email (Resend)
+RESEND_API_KEY=
+RESEND_EMAIL_FROM=
+
+# Rate Limiting (Upstash Redis)
+UPSTASH_REDIS_REST_URL=
+UPSTASH_REDIS_REST_TOKEN=
+```
+
+> Rate limiting is automatically skipped in development mode.
+
+## Local Development (Offline)
+
+You can develop entirely offline using **Supabase Local Development** — no cloud account needed.
+
+### Prerequisites
+
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) (must be running)
+- [Supabase CLI](https://supabase.com/docs/guides/local-development/cli/getting-started)
+
+```bash
+# Install Supabase CLI (macOS)
+brew install supabase/tap/supabase
+```
+
+### Start Local Supabase
+
+```bash
+# Initialize Supabase in the project (first time only)
+supabase init
+
+# Start local Supabase services (auth, PostgreSQL, Studio, etc.)
+supabase start
+```
+
+After `supabase start`, you'll see output like:
+
+```text
+API URL: http://127.0.0.1:54321
+DB URL: postgresql://postgres:postgres@127.0.0.1:54322/postgres
+anon key: eyJhbG...
+service_role key: eyJhbG...
+Studio URL: http://127.0.0.1:54323
+```
+
+### Configure `.env`
+
+Copy the values from `supabase start` output:
+
+```bash
+DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:54322/postgres
+NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=<anon key from output>
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
+```
+
+Leave `RESEND_*` and `UPSTASH_*` variables empty — they are optional:
+
+- **Rate limiting** is automatically skipped in development mode (even if Upstash keys are set).
+- **Email sending** returns a "not configured" response when Resend keys are missing.
+
+### Push Schema & Run
+
+```bash
+pnpm db:push
+pnpm dev
+```
+
+### What Works Locally
+
+| Feature                      | Local Support | Notes                                 |
+| ---------------------------- | ------------- | ------------------------------------- |
+| Auth (email/password, OAuth) | ✅            | Full Supabase Auth via local instance |
+| PostgreSQL CRUD              | ✅            | Drizzle ORM connects to local DB      |
+| Rate limiting                | ⏭️ Skipped    | Disabled in development mode          |
+| Email (Resend)               | ❌            | Requires cloud API key                |
+| Drizzle Studio               | ✅            | `pnpm db:studio`                      |
+| Supabase Studio              | ✅            | `http://127.0.0.1:54323`              |
+
+### Stop Local Supabase
+
+```bash
+supabase stop
+```
+
+## Project Structure
 
 ### Route Groups
 
-The app is organized into three main sections:
+| Group         | Purpose                | Paths                                                        |
+| ------------- | ---------------------- | ------------------------------------------------------------ |
+| `(public)`    | Landing page           | `/`                                                          |
+| `(auth)`      | Authentication         | `/login`, `/register`, `/forgot-password`, `/reset-password` |
+| `(protected)` | App shell (auth-gated) | `/dashboard`                                                 |
 
-| Route Group   | Purpose                 | Path Pattern                                    |
-| ------------- | ----------------------- | ----------------------------------------------- |
-| `(public)`    | Marketing landing page  | `/`                                             |
-| `(auth)`      | Authentication flows    | `/login`, `/register`, `/forgot-password`, etc. |
-| `(protected)` | Authenticated app shell | `/dashboard`, `/settings`, etc.                 |
-
-Each group has its own layout, styling, and logic.
+Each group has its own layout and error boundary.
 
 ### Key Directories
 
 ```text
-app/                 # Next.js App Router
-├── (auth)/         # Auth pages & forms
-├── (protected)/    # Dashboard & protected routes
-├── (public)/       # Marketing pages
-└── api/            # API endpoints
+app/                    Next.js App Router
+├── (auth)/             Auth pages with card layout
+├── (protected)/        Dashboard with sidebar shell
+├── (public)/           Marketing pages
+└── api/                API endpoints
 
-components/         # React components
-├── providers/      # Context providers (React Query, theme, etc.)
-├── app-sidebar/    # Sidebar navigation shell
-├── shared/         # Reusable components
-└── ui/             # Shadcn/ui primitives (don't modify)
+components/
+├── ui/                 Shadcn/ui primitives (do not modify)
+├── shared/             Reusable components
+├── app-sidebar/        Sidebar navigation
+└── providers/          Context providers
 
-lib/               # Utilities & helpers
-├── supabase/      # Supabase client setup
-├── drizzle/       # Database connection
-├── query/         # React Query setup
-└── api-response.ts # Response formatting
+lib/
+├── supabase/           Client + server Supabase setup
+├── drizzle/            Database connection
+├── guards/             Auth guard (requireAuth)
+├── query/              React Query client + cache keys
+├── response.ts         API response helper
+├── ratelimit.ts        Rate limiting (Upstash)
+└── seo.ts              Metadata helper
 
-drizzle/           # Database schema & migrations
-├── schemas/       # Table definitions
-└── migrations/    # SQL migrations
-
-common/            # Shared domain logic
-├── guards/        # Auth guards
-└── schemas/       # Zod validation schemas
-
-constants/         # App-wide constants
-├── routes.constant.ts      # URL definitions
-├── http-status.constant.ts # HTTP status codes
-└── app-sidebar-items.constant.ts # Navigation items
+constants/              Routes, HTTP status, sidebar, SEO
+schemas/                Zod validation schemas
+services/               API client wrappers (Axios)
+queries/                React Query option factories
+hooks/                  Custom hooks (useAuth, useMobile)
+drizzle/                Database schemas + migrations
+tests/                  Unit (Vitest) + E2E (Playwright)
 ```
 
 ## Core Features
 
-### 🔐 Authentication
+### Authentication
 
-The template includes a complete auth system:
+Pre-built auth flows with Zod validation (`schemas/auth.schema.ts`):
 
-**Available Pages:**
+- **Login** (`/login`) — Email/password + GitHub/Google OAuth
+- **Register** (`/register`) — Account creation with email verification
+- **Forgot Password** (`/forgot-password`) — Request reset link
+- **Reset Password** (`/reset-password`) — Complete the reset flow
 
-- **Login** (`/login`) - Email/password + GitHub/Google OAuth
-- **Register** (`/register`) - Create account with email verification
-- **Forgot Password** (`/forgot-password`) - Request password reset
-- **Reset Password** (`/reset-password`) - Complete the reset flow
+All forms use `react-hook-form` with `zodResolver` for type-safe validation.
 
-All forms use Zod schemas (defined in `common/schemas/auth.schema.ts`) for validation.
+### Protected Routes
 
-**Example:**
-
-```typescript
-"use client";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { loginSchema } from "@/common/schemas/auth.schema";
-
-export function LoginForm() {
-  const form = useForm({
-    resolver: zodResolver(loginSchema),
-  });
-
-  const onSubmit = async (data) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email: data.email,
-      password: data.password,
-    });
-
-    if (error) {
-      toast.error("Login failed");
-      return;
-    }
-
-    router.replace("/dashboard");
-  };
-
-  return (
-    <form onSubmit={form.handleSubmit(onSubmit)}>
-      {/* form fields */}
-    </form>
-  );
-}
-```
-
-### 🔒 Protected Routes
-
-Routes require authentication via the proxy middleware:
-
-**Define Protected Routes** (`proxy.ts`):
+Middleware in `proxy.ts` enforces authentication:
 
 ```typescript
-const PROTECTED_ROUTES: string[] = ["/dashboard/*", "/settings/*", "/admin/*"];
+// constants/routes.constant.ts
+export const PROTECTED_ROUTES = {
+  DASHBOARD: "/dashboard",
+} as const;
 ```
 
-Unauthenticated users are redirected to `/login` automatically.
+Add routes to `PROTECTED_ROUTES` — wildcard patterns are derived automatically. Unauthenticated users redirect to `/login`.
 
-### 🗂️ Navigation & Sidebar
+### API Layer
 
-Edit `constants/app-sidebar-items.constant.ts` to customize sidebar navigation:
-
-```typescript
-import { Home, Settings, BarChart3 } from "lucide-react";
-
-export const APP_SIDEBAR_ITEMS = {
-  platform: {
-    title: "Platform",
-    items: [
-      { name: "Dashboard", url: "/dashboard", icon: Home },
-      { name: "Analytics", url: "/analytics", icon: BarChart3 },
-      { name: "Settings", url: "/settings", icon: Settings },
-    ],
-  },
-};
-```
-
-### 📡 API Development
-
-Create type-safe API endpoints with consistent response formatting:
-
-**Example Endpoint:**
+All API endpoints use `apiResponse()` for a consistent response format:
 
 ```typescript
 // app/api/users/me/route.ts
-import { apiResponse } from "@/lib/api-response";
-import { requireAuth } from "@/common/guards/auth.guard";
+import { apiResponse } from "@/lib/response";
+import { requireAuth } from "@/lib/guards/auth.guard";
 import { HttpStatus } from "@/constants/http-status.constant";
 
 export async function GET() {
@@ -221,313 +211,177 @@ export async function GET() {
 }
 ```
 
-All endpoints return a consistent shape:
+Response shape:
 
 ```json
-{
-  "success": true,
-  "data": {
-    /* your data */
+// Success (2xx)
+{ "success": true, "data": { ... } }
+
+// Error (4xx/5xx)
+{ "success": false, "data": null, "error": "Unauthorized" }
+```
+
+See [API Response Pattern →](./patterns/api-response) for details.
+
+## Data Fetching
+
+Three-layer pattern: **Service → Query Options → Component**
+
+```typescript
+// 1. Service — services/users.service.ts
+export const usersService = {
+  me: async (): Promise<SelectProfile | null> => {
+    try {
+      const response = await axiosInstance.get<{ data: SelectProfile | null }>(API_ROUTES.USERS.ME);
+      return response.data.data ?? null;
+    } catch (error) {
+      console.error("Failed to fetch user profile:", error);
+      return null;
+    }
   },
-  "error": null
-}
-```
+};
 
-## 📊 Data Management
-
-### TanStack React Query
-
-Handle data fetching, caching, and synchronization:
-
-**1. Define Query Options:**
-
-```typescript
-// queries/profile.query.ts
-import { queryOptions } from "@tanstack/react-query";
-import { queryKeys } from "@/lib/query/query-keys";
-import { profileService } from "@/services/profile.service";
-
-export const getProfileQueryOptions = () =>
+// 2. Query Options — queries/user.query.ts
+export const getUserQueryOptions = () =>
   queryOptions({
-    queryKey: queryKeys.profile.me(),
-    queryFn: () => profileService.me(),
+    queryKey: getQueryKey.users.me(),
+    queryFn: () => usersService.me(),
   });
+
+// 3. Component — use via useQuery or the useAuth hook
+const { data: profile, isLoading } = useQuery(getUserQueryOptions());
 ```
 
-**2. Use in Components:**
+See [Query Keys Pattern →](./patterns/query-keys) for cache management.
+
+## Database
+
+Drizzle ORM with PostgreSQL:
 
 ```typescript
-"use client";
-import { useQuery } from "@tanstack/react-query";
-import { getProfileQueryOptions } from "@/queries/profile.query";
-
-export function UserProfile() {
-  const { data: profile, isLoading, error } = useQuery(getProfileQueryOptions());
-
-  if (isLoading) return <div>Loading...</div>;
-  if (error) return <div>Error loading profile</div>;
-
-  return <div>{profile?.email}</div>;
-}
-```
-
-### Context Providers
-
-Wrap your app with providers for global state:
-
-```typescript
-// components/providers/user-profile-provider.tsx
-"use client";
-
-import { createContext, useContext } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { getProfileQueryOptions } from "@/queries/profile.query";
-
-const UserProfileContext = createContext(null);
-
-export function UserProfileProvider({ children }) {
-  const { data: profile } = useQuery(getProfileQueryOptions());
-
-  return (
-    <UserProfileContext.Provider value={{ profile }}>
-      {children}
-    </UserProfileContext.Provider>
-  );
-}
-
-export function useUserProfile() {
-  const context = useContext(UserProfileContext);
-  if (!context) {
-    throw new Error("useUserProfile must be used within UserProfileProvider");
-  }
-  return context;
-}
-```
-
-### Drizzle ORM
-
-Type-safe database operations:
-
-**Define Schema:**
-
-```typescript
-// drizzle/schemas/profiles/profile.schema.ts
-import { pgTable, varchar, uuid } from "drizzle-orm/pg-core";
-import { baseColumns } from "../base";
-
+// drizzle/schemas/profiles/profiles.schema.ts
 export const profiles = pgTable("profiles", {
-  ...baseColumns,
+  ...baseColumns, // id, createdAt, updatedAt, deletedAt
   email: varchar("email", { length: 255 }).notNull(),
   name: varchar("name", { length: 100 }).notNull(),
   imageUrl: varchar("image_url", { length: 255 }),
 });
 ```
 
-**Query Database:**
-
-```typescript
-import { db } from "@/lib/drizzle/db";
-import { profiles } from "@/drizzle/schemas";
-import { eq } from "drizzle-orm";
-
-const user = await db.select().from(profiles).where(eq(profiles.id, userId)).limit(1);
-```
-
-**Database Commands:**
-
 ```bash
-# Push schema changes to database
-pnpm db:push
-
-# Generate migrations
-pnpm db:migrate <name>
-
-# Apply migrations
-pnpm db:update
-
-# Open Drizzle Studio (visual editor)
-pnpm db:studio
+pnpm db:push              # Push schema to database
+pnpm db:migrate <name>    # Generate migration
+pnpm db:update            # Apply migrations
+pnpm db:studio            # Visual editor
 ```
 
-## 💌 Email & Notifications
+### Profiles trigger
 
-### Resend Integration
+The dashboard fetches the user's profile from the `profiles` table. To auto-create a profile row when a new user signs up, add this trigger in the Supabase SQL Editor:
 
-Send transactional emails:
+```sql
+-- Auto-create a profiles row when a new user signs up
+create or replace function public.handle_new_user()
+returns trigger as $$
+begin
+  insert into public.profiles (id, email, name)
+  values (
+    new.id,
+    new.email,
+    coalesce(new.raw_user_meta_data ->> 'name', split_part(new.email, '@', 1))
+  );
+  return new;
+end;
+$$ language plpgsql security definer;
 
-**API Endpoint:**
-
-```typescript
-// app/api/send/route.ts
-export async function POST(request: NextRequest) {
-  const { user, error } = await requireAuth();
-  if (error) return error;
-
-  const { to, subject, html } = await request.json();
-
-  const result = await resend.emails.send({
-    from: process.env.RESEND_EMAIL_FROM,
-    to,
-    subject,
-    html,
-  });
-
-  return apiResponse({
-    data: result,
-    status: HttpStatus.OK,
-  });
-}
+create or replace trigger on_auth_user_created
+  after insert on auth.users
+  for each row execute function public.handle_new_user();
 ```
 
-**Usage in Components:**
+## Email (Resend)
+
+Optional transactional email via the `/api/mail/send` endpoint. Requires `RESEND_API_KEY` and `RESEND_EMAIL_FROM` environment variables. Returns "Email service not configured" when keys are missing.
+
+## SEO
+
+Use `buildMetadata()` for consistent metadata across pages:
 
 ```typescript
-const response = await fetch("/api/send", {
-  method: "POST",
-  body: JSON.stringify({
-    to: user.email,
-    subject: "Welcome!",
-    html: "<h1>Welcome to our app!</h1>",
-  }),
-});
-```
-
-### Toast Notifications
-
-Display feedback using `sonner`:
-
-```typescript
-import { toast } from "sonner";
-
-// Success
-toast.success("Profile updated!", {
-  description: "Your changes have been saved.",
-});
-
-// Error
-toast.error("Something went wrong", {
-  description: "Please try again.",
-});
-
-// Info
-toast.info("Please log in", {
-  description: "You need to be authenticated.",
-});
-```
-
-## 🎯 SEO & Metadata
-
-Use the `buildMetadata()` helper for consistent SEO:
-
-**Global Defaults** (root layout):
-
-```typescript
-// app/layout.tsx
 import { buildMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = buildMetadata();
+// Root layout — uses defaults from constants/seo.constant.ts
+export const metadata = buildMetadata();
+
+// Per-page metadata
+export const metadata = buildMetadata({
+  title: "Dashboard",
+  description: "Your dashboard",
+  path: "/dashboard",
+});
 ```
 
-**Per-Page Metadata:**
+Generates Open Graph, Twitter cards, canonical URLs, and robots directives.
 
-```typescript
-// app/blog/[slug]/page.tsx
-import { buildMetadata } from "@/lib/seo";
-
-export async function generateMetadata({ params }) {
-  const { slug } = await params;
-
-  return buildMetadata({
-    title: `Blog: ${slug}`,
-    description: `Read ${slug}`,
-    path: `/blog/${slug}`,
-    image: "/og.png",
-  });
-}
-```
-
-Automatically generates Open Graph, Twitter, canonical URLs, and robots metadata.
-
-## ✅ Code Quality
-
-### Linting & Formatting
+## Commands
 
 ```bash
-# Run ESLint
-pnpm lint
+# Development
+pnpm dev                    # Dev server
+pnpm build                  # Production build
+pnpm start                  # Serve production build
+pnpm start:all              # Dev + docs + Drizzle Studio
 
-# Fix linting issues
-pnpm lint:fix
+# Database
+pnpm db:push                # Push schema
+pnpm db:migrate <name>      # Generate migration
+pnpm db:update              # Apply migrations
+pnpm db:studio              # Visual editor
 
-# Format code
-pnpm format
+# Quality
+pnpm lint                   # ESLint
+pnpm lint:fix               # Auto-fix lint issues
+pnpm format                 # Prettier
+
+# Testing
+pnpm test:unit              # Vitest
+pnpm test:e2e               # Playwright
+pnpm test:e2e:ui            # Playwright with UI
+
+# Docs
+pnpm docs:dev               # VitePress (port 4000)
+pnpm docs:build             # Build docs
 ```
 
-### Testing
+## Customization
 
-```bash
-# Unit tests (Vitest)
-pnpm test:unit
+1. **Set up Supabase** — Configure environment variables
+2. **Update branding** — Edit `constants/seo.constant.ts` with your domain
+3. **Customize navigation** — Edit `constants/app-sidebar-items.constant.ts`
+4. **Add routes** — Create pages in the appropriate route group
+5. **Extend schema** — Add tables in `drizzle/schemas/`
+6. **Build features** — Follow the Service → Query → Component pattern
 
-# E2E tests (Playwright)
-pnpm test:e2e
+## Patterns
 
-# Watch mode
-pnpm test:e2e:ui
-```
+| Pattern           | Purpose                       | Link                                      |
+| ----------------- | ----------------------------- | ----------------------------------------- |
+| API Response      | Consistent endpoint responses | [Read more →](./patterns/api-response)    |
+| Auth Guard        | Protect API routes            | [Read more →](./patterns/auth-guard)      |
+| Form Validation   | Type-safe forms with Zod      | [Read more →](./patterns/form-validation) |
+| Route Definitions | Centralized URL constants     | [Read more →](./patterns/routes)          |
+| Query Keys        | React Query cache management  | [Read more →](./patterns/query-keys)      |
+| HTTP Status       | Centralized status codes      | [Read more →](./patterns/http-status)     |
 
-### Building
+## Resources
 
-```bash
-# Build for production
-pnpm build
-
-# Start production server
-pnpm start
-```
-
-## 🏗️ Architecture Patterns
-
-This template uses standardized patterns for common tasks:
-
-| Pattern               | Purpose                       | Link                                         |
-| --------------------- | ----------------------------- | -------------------------------------------- |
-| **Auth Guard**        | Protect API routes            | [Read more →](./patterns/auth-guard.md)      |
-| **Form Validation**   | Type-safe forms with Zod      | [Read more →](./patterns/form-validation.md) |
-| **API Response**      | Consistent endpoint responses | [Read more →](./patterns/api-response.md)    |
-| **Route Definitions** | Centralized URL constants     | [Read more →](./patterns/routes.md)          |
-| **Query Keys**        | React Query cache management  | [Read more →](./patterns/query-keys.md)      |
-| **HTTP Status Codes** | Centralized status handling   | [Read more →](./patterns/http-status.md)     |
-
-For deep dives into each pattern, see [Architecture Patterns →](./patterns/)
-
-## 🚀 Next Steps
-
-### Customize the Template
-
-1. **Update environment variables** - Set up your Supabase project
-2. **Modify sidebar items** - Edit `constants/app-sidebar-items.constant.ts`
-3. **Update SEO constants** - Edit `constants/seo.constant.ts` with your domain
-4. **Create your first page** - Add a new route in `app/(protected)/`
-5. **Build your database schema** - Define tables in `drizzle/schemas/`
-
-### Explore Examples
-
-- **Auth flow:** Check `app/(auth)/login/page.client.tsx`
-- **Protected API:** See `app/api/users/me/route.ts`
-- **Data fetching:** Look at `queries/profile.query.ts` and `services/profile.service.ts`
-- **Form handling:** Study `app/(auth)/register/page.client.tsx`
-
-### Learn More
-
-- [Architecture Patterns →](./patterns/index.md) - Deep dive into design patterns
-- [AGENTS.md](../AGENTS.md) - Comprehensive technical documentation
-- [Next.js Documentation](https://nextjs.org/docs)
-- [Supabase Documentation](https://supabase.com/docs)
-- [Drizzle Documentation](https://orm.drizzle.team/)
-
-## 💬 Support & Contributions
-
-Found a bug or have a suggestion? Feel free to open an issue or contribute!
-
-Happy building! 🚀
+| Resource                                           | Description                    |
+| -------------------------------------------------- | ------------------------------ |
+| [Next.js](https://nextjs.org/docs)                 | Framework documentation        |
+| [Supabase](https://supabase.com/docs)              | Auth, database, and realtime   |
+| [Drizzle ORM](https://orm.drizzle.team)            | Type-safe database queries     |
+| [Shadcn/ui](https://ui.shadcn.com)                 | Component library              |
+| [Origin UI](https://originui.com)                  | Shadcn-based UI components     |
+| [tweakcn](https://tweakcn.com)                     | Visual theme editor for Shadcn |
+| [Motion Primitives](https://motion-primitives.com) | Animated React components      |
+| [Upstash](https://upstash.com)                     | Serverless Redis               |

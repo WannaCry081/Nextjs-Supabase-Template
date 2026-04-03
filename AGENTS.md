@@ -1,12 +1,12 @@
 # AGENTS.md
 
-Developer guide for working with your cloned Next.js + Supabase project. This guide outlines the project structure, conventions, patterns, and workflows to help you understand and extend the starter template.
+Developer guide for working with your cloned NextBase project. This guide outlines the project structure, conventions, patterns, and workflows to help you understand and extend the starter template.
 
 ## Project Overview
 
 ### What You Have
 
-You've cloned a full-stack starter built on Next.js + Supabase + Drizzle ORM, with a separate VitePress docs site:
+You've cloned a full-stack starter built on NextBase (Next.js + Supabase + Drizzle ORM), with a separate VitePress docs site:
 
 - **Included features:** Authentication flows, protected routes, dashboard shell, API routes, and CI pipeline for lint/unit/e2e/build
 - **Key directories:** `app/(auth)/*`, `app/(protected)/*`, `app/api/*`, `.github/workflows/*`
@@ -29,7 +29,7 @@ The starter uses a specific folder structure. Understand these key locations:
 - Database layer: `lib/drizzle/db.ts`, `drizzle/schemas/*`, `drizzle/migrations/*`
 - Data fetching: `services/*` (API wrappers), `queries/*` (React Query options)
 - UI: `components/ui/*` (Shadcn/Radix), `components/shared/*` (reusable), `components/app-sidebar/*` (sidebar shell)
-- Global setup: `components/providers/*` (React Query, theme, auth context)
+- Global setup: `components/providers/*` (React Query, theme, toast/loading)
 
 ### Folder Reference
 
@@ -45,6 +45,7 @@ The starter uses a specific folder structure. Understand these key locations:
 | `types/`      | TypeScript types and interfaces                      |
 | `constants/`  | App-wide constants (routes, SEO, sidebar items)      |
 | `docs/`       | VitePress documentation site                         |
+| `schemas/`    | Zod validation schemas (auth forms, etc.)            |
 
 ## Setup & Prerequisites
 
@@ -58,7 +59,7 @@ To develop with this template, ensure you have:
 
 ### Environment Configuration
 
-Before running the project, configure these environment variables in `.env.local` or `.env`:
+Before running the project, configure these environment variables in `.env`:
 
 ```bash
 DATABASE_URL                           # Supabase PostgreSQL connection string
@@ -67,20 +68,22 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY   # Supabase publishable key
 NEXT_PUBLIC_SITE_URL                   # Your app URL (e.g., http://localhost:3000)
 RESEND_API_KEY                         # Email API key (Resend)
 RESEND_EMAIL_FROM                      # Sender email address
+UPSTASH_REDIS_REST_URL                 # Upstash Redis URL (for rate limiting)
+UPSTASH_REDIS_REST_TOKEN               # Upstash Redis token (for rate limiting)
 ```
 
-Copy `.env.example` to `.env.local` and fill in your values. See:
+Copy `.env.example` to `.env` and fill in your values. See:
 
 - Database: `lib/drizzle/db.ts`, `config/drizzle.config.ts`
 - Auth: `lib/supabase/client.ts`, `lib/supabase/server.ts`
 - SEO: `constants/seo.constant.ts`
-- Email: `app/api/send/route.ts`
+- Email: `app/api/mail/send/route.ts`
 
 ### Quick Start
 
 ```bash
 pnpm install
-cp .env.example .env.local
+cp .env.example .env
 # Fill in your environment variables
 pnpm start:development
 ```
@@ -97,7 +100,7 @@ pnpm start:all
 
 The initial migration creates a `profiles` table. To set up your database:
 
-1. Connect your Supabase PostgreSQL URL in `.env.local`
+1. Connect your Supabase PostgreSQL URL in `.env`
 2. Run `pnpm db:push` to apply migrations
 3. (Optional) Add seed data via SQL, Drizzle Studio, or a custom script
 
@@ -188,15 +191,15 @@ No deployment automation is currently configured. The CI validates code quality 
 - Route files use Next.js App Router conventions (`app/**/page.tsx`, `app/**/layout.tsx`).
 - Interactive route logic is commonly split into `page.client.tsx` (`app/(auth)/*/page.client.tsx`).
 - Domain suffixes:
-  - `*.service.ts` for fetch/API client logic (`services/profile.service.ts`)
-  - `*.query.ts` for TanStack query options (`queries/profile.query.ts`)
+  - `*.service.ts` for fetch/API client logic (`services/users.service.ts`)
+  - `*.query.ts` for TanStack query options (`queries/user.query.ts`)
   - `*.constant.ts` for constants (`constants/*.constant.ts`)
-  - `use-*.ts` hooks (`hooks/use-auth.ts`, `hooks/use-user-profile.ts`)
+  - `use-*.ts` hooks (`hooks/use-auth.ts`, `hooks/use-mobile.ts`)
 
 ### Error Handling Patterns
 
 - Client actions: place try/catch inside `startTransition` async callbacks and show toast notifications (`app/(auth)/*/page.client.tsx`).
-- API routes: return structured JSON with proper HTTP status and avoid leaking stack traces (`app/api/users/me/route.ts`, `app/api/send/route.ts`).
+- API routes: return structured JSON with proper HTTP status and avoid leaking stack traces (`app/api/users/me/route.ts`, `app/api/mail/send/route.ts`).
 
 ## Repository Conventions
 
@@ -232,14 +235,16 @@ No deployment automation is currently configured. The CI validates code quality 
 
 ### Auth and Route Protection
 
-- Protected route matching is configured centrally in `proxy.ts` via `PROTECTED_ROUTES`.
+- Protected route matching is configured centrally via `PROTECTED_ROUTE_PATTERNS` (derived from `PROTECTED_ROUTES` in `constants/routes.constant.ts`).
 - Supabase session claims gate access in `lib/supabase/middleware.ts`.
-- Add new protected sections to `PROTECTED_ROUTES` when introducing sensitive pages.
+- Add new protected routes to `PROTECTED_ROUTES` in `constants/routes.constant.ts`; patterns are derived automatically.
 
 ### API and Permission Hygiene
 
-- `app/api/send/route.ts` validates payload shape and requires Supabase authentication.
-- Consider adding rate limiting before production use of email endpoints.
+- `app/api/mail/send/route.ts` validates payload shape and requires Supabase authentication.
+- All API routes are rate limited via Upstash Redis (`lib/ratelimit.ts`). Rate limiting is optional — it gracefully skips when `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` env vars are not set.
+- Rate limit tiers: `api` (20 req/10s for general), `auth` (5 req/60s for login/register), `email` (3 req/60s for mail sending).
+- 429 responses include `Retry-After`, `X-RateLimit-Limit`, `X-RateLimit-Remaining`, and `X-RateLimit-Reset` headers.
 
 ### Dependencies
 
@@ -255,7 +260,7 @@ No deployment automation is currently configured. The CI validates code quality 
    - API route in `app/api/...`
    - service in `services/...`
    - query options in `queries/...`
-3. If protected, update `PROTECTED_ROUTES` in `proxy.ts`.
+3. If protected, add the route to `PROTECTED_ROUTES` in `constants/routes.constant.ts`.
 4. If dashboard navigation changes, edit `constants/app-sidebar-items.constant.ts`.
 5. Add/update tests in `tests/unit` or `tests/e2e`.
 
@@ -272,13 +277,13 @@ No deployment automation is currently configured. The CI validates code quality 
 2. Generate migration with `pnpm db:migrate` and inspect SQL under `drizzle/migrations/`.
 3. Apply migration via `pnpm db:update` (or `pnpm db:push` in development workflows).
 4. Update affected types/services/routes (`types/drizzle.types.ts`, `services/*`, `app/api/*`).
-5. Validate `/api/users/me` and related UI (`components/app-sidebar/*`, `hooks/use-user-profile.ts`).
+5. Validate `/api/users/me` and related UI (`components/app-sidebar/*`, `hooks/use-auth.ts` via `useAuth`).
 
 ## Troubleshooting & FAQs
 
 ### “Why am I always redirected to `/login`?”
 
-- Path is likely protected by `PROTECTED_ROUTES` in `proxy.ts`, and session claims are missing (`lib/supabase/middleware.ts`).
+- Path is likely protected by `PROTECTED_ROUTE_PATTERNS` (from `constants/routes.constant.ts`), and session claims are missing (`lib/supabase/middleware.ts`).
 
 ### “Why is profile data null in the dashboard/sidebar?”
 
@@ -287,8 +292,8 @@ No deployment automation is currently configured. The CI validates code quality 
 
 ### “Build fails with env errors or runtime crashes”
 
-- Verify required env vars in `.env.local`/`.env` and in CI secrets.
-- Check usage points: `lib/supabase/*`, `lib/drizzle/db.ts`, `app/api/send/route.ts`.
+- Verify required env vars in `.env` and in CI secrets.
+- Check usage points: `lib/supabase/*`, `lib/drizzle/db.ts`, `app/api/mail/send/route.ts`.
 
 ### “Playwright fails locally”
 
@@ -333,18 +338,19 @@ No deployment automation is currently configured. The CI validates code quality 
 
 ### File Naming Patterns
 
-| Category        | Pattern                                              | Example                                      |
-| --------------- | ---------------------------------------------------- | -------------------------------------------- |
-| Components      | `component-name.tsx`                                 | `password-input.tsx`                         |
-| Pages           | `page.tsx`, `layout.tsx`, `loading.tsx`, `error.tsx` | `app/(auth)/login/page.tsx`                  |
-| Client pages    | `page.client.tsx`                                    | `app/(auth)/login/page.client.tsx`           |
-| API routes      | `route.ts`                                           | `app/api/users/me/route.ts`                  |
-| Hooks           | `use-hook-name.ts`                                   | `hooks/use-auth.ts`                          |
-| Services        | `name.service.ts`                                    | `services/profile.service.ts`                |
-| Query options   | `name.query.ts`                                      | `queries/profile.query.ts`                   |
-| Constants       | `name.constant.ts`                                   | `constants/seo.constant.ts`                  |
-| Drizzle schemas | `name.schema.ts`                                     | `drizzle/schemas/profiles/profile.schema.ts` |
-| Types           | `name.types.ts`                                      | `types/drizzle.types.ts`                     |
+| Category        | Pattern                                              | Example                                       |
+| --------------- | ---------------------------------------------------- | --------------------------------------------- |
+| Components      | `component-name.tsx`                                 | `password-input.tsx`                          |
+| Pages           | `page.tsx`, `layout.tsx`, `loading.tsx`, `error.tsx` | `app/(auth)/login/page.tsx`                   |
+| Client pages    | `page.client.tsx`                                    | `app/(auth)/login/page.client.tsx`            |
+| API routes      | `route.ts`                                           | `app/api/users/me/route.ts`                   |
+| Hooks           | `use-hook-name.ts`                                   | `hooks/use-auth.ts`                           |
+| Services        | `name.service.ts`                                    | `services/users.service.ts`                   |
+| Query options   | `name.query.ts`                                      | `queries/user.query.ts`                       |
+| Constants       | `name.constant.ts`                                   | `constants/seo.constant.ts`                   |
+| Drizzle schemas | `name.schema.ts`                                     | `drizzle/schemas/profiles/profiles.schema.ts` |
+| Zod schemas     | `name.schema.ts`                                     | `schemas/auth.schema.ts`                      |
+| Types           | `name.types.ts`                                      | `types/drizzle.types.ts`                      |
 
 ## Project Structure
 
@@ -352,6 +358,7 @@ No deployment automation is currently configured. The CI validates code quality 
 project/
 ├── app/                           # Next.js App Router
 │   ├── (auth)/                    # Auth route group (no URL segment)
+│   │   ├── error.tsx              # Auth error boundary (card-based)
 │   │   ├── layout.tsx             # Centered card layout with branding
 │   │   ├── login/
 │   │   │   ├── page.tsx           # Server entry → renders PageClient
@@ -366,32 +373,32 @@ project/
 │   │       ├── page.tsx
 │   │       └── page.client.tsx
 │   ├── (protected)/               # Protected route group (auth-gated via proxy.ts)
-│   │   ├── layout.tsx             # Sidebar shell + UserProfileProvider
+│   │   ├── error.tsx              # Protected error boundary
+│   │   ├── layout.tsx             # Sidebar shell (SidebarProvider + SiteHeader + AppSidebar)
+│   │   ├── loading.tsx            # Protected loading skeleton
 │   │   └── dashboard/
-│   │       ├── page.tsx
-│   │       └── page.client.tsx
+│   │       └── page.tsx           # Server component (static placeholder)
 │   ├── (public)/                  # Public marketing route group
-│   │   ├── layout.tsx             # Passthrough layout
-│   │   ├── page.tsx
+│   │   ├── error.tsx              # Public error boundary
+│   │   ├── page.tsx               # Server entry → renders PageClient
 │   │   └── page.client.tsx        # Landing page with nav, hero, features
 │   ├── api/
+│   │   ├── healthcheck/route.ts   # GET: service health check
 │   │   ├── users/me/route.ts      # GET: profile by Supabase user ID
-│   │   └── send/route.ts          # POST: send email via Resend (auth-gated)
+│   │   └── mail/send/route.ts     # POST: send email via Resend (auth-gated)
 │   ├── styles/globals.css
 │   └── layout.tsx                 # Root layout: fonts, providers
 ├── components/
 │   ├── app-sidebar/               # Dashboard sidebar shell
 │   │   ├── index.tsx              # AppSidebar (use client)
 │   │   ├── nav-drawer.tsx         # Collapsible nested nav
-│   │   ├── nav-primary.tsx        # Main nav items
-│   │   ├── nav-secondary.tsx      # Bottom nav items (settings, feedback)
+│   │   ├── nav-items.tsx          # Sidebar nav items (links with icons)
 │   │   ├── nav-user.tsx           # User avatar + dropdown (use client)
 │   │   └── site-header.tsx        # Sticky header + breadcrumb (use client)
 │   ├── providers/                 # React context providers
 │   │   ├── app-provider.tsx       # Toaster + TopLoader + TooltipProvider
 │   │   ├── react-query-provider.tsx  # QueryClientProvider + DevTools
-│   │   ├── theme-provider.tsx     # next-themes ThemeProvider
-│   │   └── user-profile-provider.tsx # Profile context via React Query
+│   │   └── theme-provider.tsx     # next-themes ThemeProvider
 │   ├── shared/                    # Reusable components across features
 │   │   └── password-input.tsx     # Password input with show/hide toggle
 │   └── ui/                        # Shadcn/Radix primitives (DO NOT MODIFY)
@@ -413,18 +420,14 @@ project/
 │       ├── textarea.tsx
 │       └── tooltip.tsx
 ├── config/                        # Tool configs
+│   ├── axios.config.ts            # Axios instance with base URL and headers
 │   ├── drizzle.config.ts
 │   ├── playwright.config.ts
 │   └── vitest.config.mts
-├── common/                        # Shared domain logic
-│   ├── guards/                    # Auth guards and validation
-│   └── schemas/                   # Zod validation schemas
 ├── constants/                     # App-wide constants
-│   ├── api.constant.ts            # API endpoint definitions
 │   ├── app-sidebar-items.constant.ts # Sidebar navigation items
-│   ├── http-error-messages.constant.ts # Error messages mapping
-│   ├── http-status.constant.ts    # HTTP status codes
-│   ├── routes.constant.ts         # Route definitions
+│   ├── http-status.constant.ts    # HTTP status codes and HttpStatus object
+│   ├── routes.constant.ts         # Route definitions (PUBLIC, AUTH, PROTECTED, API)
 │   └── seo.constant.ts            # SEO metadata constants
 ├── docs/                          # VitePress documentation site
 │   ├── .vitepress/config.mts
@@ -436,29 +439,33 @@ project/
 │   │   ├── base.ts                # Shared columns: id, createdAt, updatedAt, deletedAt
 │   │   ├── index.ts               # Re-exports all schemas
 │   │   └── profiles/
-│   │       └── profile.schema.ts  # profiles table
+│   │       └── profiles.schema.ts # profiles table
 │   └── migrations/
 │       └── 0000_InitialCreate.sql
 ├── hooks/                         # Custom React hooks
-│   ├── use-auth.ts                # Supabase session + onAuthStateChange
-│   ├── use-mobile.ts              # Viewport breakpoint detection
-│   └── use-user-profile.ts        # UserProfileContext consumer
+│   ├── use-auth.ts                # Supabase auth session + profile fetching via React Query
+│   └── use-mobile.ts              # Viewport breakpoint detection
 ├── lib/                           # Utilities and helpers
 │   ├── drizzle/db.ts              # Drizzle client (postgres.js driver)
+│   ├── guards/
+│   │   └── auth.guard.ts          # requireAuth() — Supabase auth guard for API routes
 │   ├── query/
 │   │   ├── get-query-client.ts    # TanStack QueryClient factory (SSR-aware)
-│   │   └── query-keys.ts          # Hierarchical query key definitions
+│   │   └── get-query-keys.ts      # Hierarchical query key definitions
+│   ├── response.ts                # apiResponse() — structured JSON response helper
+│   ├── ratelimit.ts               # Upstash rate limiting (sliding window, 3 tiers)
 │   ├── seo.ts                     # buildMetadata() helper
 │   ├── supabase/
 │   │   ├── client.ts              # Browser client (singleton)
 │   │   ├── server.ts              # Server client (async, cookie-based)
 │   │   └── middleware.ts          # Session refresh + route protection
-│   ├── api-response.ts            # Response formatting helper
 │   └── utils.ts                   # cn() — clsx + tailwind-merge
 ├── queries/                       # TanStack Query option factories
-│   └── profile.query.ts
-├── services/                      # API client wrappers
-│   └── profile.service.ts
+│   └── user.query.ts
+├── schemas/                       # Zod validation schemas
+│   └── auth.schema.ts             # Login, register, forgot/reset password schemas
+├── services/                      # API client wrappers (axios-based)
+│   └── users.service.ts
 ├── tests/
 │   ├── unit/utils.test.ts         # Vitest + jsdom
 │   └── e2e/homepage.spec.ts       # Playwright (Chromium/Firefox/WebKit)
@@ -506,7 +513,6 @@ project/
   1. `ReactQueryProvider` — TanStack Query client + DevTools
   2. `AppProvider` — Toaster (sonner), TopLoader, TooltipProvider
   3. `ThemeProvider` — next-themes (dark/light/system)
-  4. `UserProfileProvider` — profile context (protected routes only, in `app/(protected)/layout.tsx`)
 
 ### Component Hierarchy Rules
 
@@ -531,11 +537,11 @@ providers/   → Context providers (wrap in layouts)
 
 This project uses three route groups (parenthesized directories that don't create URL segments):
 
-| Group         | Path                                                         | Purpose                | Layout                                 |
-| ------------- | ------------------------------------------------------------ | ---------------------- | -------------------------------------- |
-| `(public)`    | `/`                                                          | Marketing landing page | Passthrough (`<>{children}</>`)        |
-| `(auth)`      | `/login`, `/register`, `/forgot-password`, `/reset-password` | Auth flows             | Centered card with branding            |
-| `(protected)` | `/dashboard/*`                                               | App shell (auth-gated) | Sidebar + header + UserProfileProvider |
+| Group         | Path                                                         | Purpose                | Layout                             |
+| ------------- | ------------------------------------------------------------ | ---------------------- | ---------------------------------- |
+| `(public)`    | `/`                                                          | Marketing landing page | No layout (inherits root)          |
+| `(auth)`      | `/login`, `/register`, `/forgot-password`, `/reset-password` | Auth flows             | Centered card with branding        |
+| `(protected)` | `/dashboard/*`                                               | App shell (auth-gated) | Sidebar + header (SidebarProvider) |
 
 ### Server/Client Split Pattern
 
@@ -586,20 +592,18 @@ export const PageClient = () => {
 
 ```typescript
 // app/(protected)/layout.tsx
-<UserProfileProvider>
-  <div className="[--header-height:calc(--spacing(14))]">
-    <SidebarProvider className="flex flex-col">
-      <SiteHeader />
-      <div className="flex flex-1">
-        <AppSidebar />
-        <SidebarInset>{children}</SidebarInset>
-      </div>
-    </SidebarProvider>
-  </div>
-</UserProfileProvider>
+<div className="[--header-height:calc(--spacing(14))]">
+  <SidebarProvider className="flex flex-col">
+    <SiteHeader />
+    <div className="flex flex-1">
+      <AppSidebar />
+      <SidebarInset>{children}</SidebarInset>
+    </div>
+  </SidebarProvider>
+</div>
 ```
 
-- `UserProfileProvider` scoped to protected routes only (not global)
+- Profile data is fetched via `useAuth()` hook (in `hooks/use-auth.ts`), not a dedicated provider
 - CSS variable `--header-height` coordinates sticky header and sidebar offset
 - Auth enforcement happens in `proxy.ts` middleware, not in the layout
 
@@ -608,22 +612,23 @@ export const PageClient = () => {
 ```typescript
 // proxy.ts — Next.js middleware entry
 import { updateSession } from "@/lib/supabase/middleware";
-
-const PROTECTED_ROUTES: string[] = ["/dashboard/*"];
+import { PROTECTED_ROUTE_PATTERNS } from "@/constants/routes.constant";
 
 export async function proxy(request: NextRequest) {
-  return await updateSession(request, PROTECTED_ROUTES);
+  return await updateSession(request, PROTECTED_ROUTE_PATTERNS);
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)"],
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico|api/healthcheck|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+  ],
 };
 ```
 
 - Uses `supabase.auth.getClaims()` (not `getUser()`) for performance — avoids a DB round-trip
 - Supports wildcard patterns: `"/dashboard/*"` matches `/dashboard` and `/dashboard/**`
 - Unauthenticated users are redirected to `/login?redirect=<original_path>`
-- **Add new protected routes** by appending to `PROTECTED_ROUTES` array
+- **Add new protected routes** to `PROTECTED_ROUTES` in `constants/routes.constant.ts`
 
 ### Metadata and SEO
 
@@ -632,7 +637,7 @@ export const config = {
 import { buildMetadata } from "@/lib/seo";
 
 export const metadata = buildMetadata({
-  title: "Dashboard", // → "Dashboard | Next.js Supabase Template"
+  title: "Dashboard", // → "Dashboard | NextBase"
   description: "Your dashboard",
   path: "/dashboard", // canonical URL
   noIndex: false, // robots indexing
@@ -648,7 +653,7 @@ export const metadata = buildMetadata({
 2. Create directory: `app/(<group>)/<route-name>/`
 3. Add `page.tsx` (server entry) + `page.client.tsx` (client logic)
 4. Add `metadata` export in `page.tsx` using `buildMetadata()`
-5. If protected, ensure the path matches a pattern in `PROTECTED_ROUTES` in `proxy.ts`
+5. If protected, ensure the path matches a pattern in `PROTECTED_ROUTES` in `constants/routes.constant.ts`
 6. If it needs sidebar navigation, update `constants/app-sidebar-items.constant.ts`
 
 ## Supabase Integration Patterns
@@ -716,16 +721,10 @@ export async function getSupabaseServer() {
 ### Authentication in API Routes
 
 ```typescript
-// Pattern used in app/api/users/me/route.ts and app/api/send/route.ts
-const supabase = await getSupabaseServer();
-const {
-  data: { user },
-  error,
-} = await supabase.auth.getUser();
-
-if (error || !user) {
-  return NextResponse.json({ data: null, error }, { status: 401 });
-}
+// Pattern used in app/api/users/me/route.ts and app/api/mail/send/route.ts
+// Via the requireAuth() guard in lib/guards/auth.guard.ts:
+const { user, error } = await requireAuth();
+if (error) return error;
 
 // user.id matches profiles.id in Drizzle schema
 ```
@@ -770,34 +769,32 @@ Service (services/*.service.ts)
 
 Query Options (queries/*.query.ts)
   → TanStack React Query queryOptions factory
-  → hierarchical query keys: ["profile", "me"]
+  → hierarchical query keys: ["users", "me"]
 
-Component (via useQuery or Provider)
+Component (via useQuery or useAuth hook)
   → consumes query options with useQuery()
-  → or via context provider (UserProfileProvider)
+  → or via useAuth() hook (which wraps useQuery internally)
 ```
 
 ```typescript
-// 1. Service — services/profile.service.ts
-export const profileService = {
+// 1. Service — services/users.service.ts
+export const usersService = {
   me: async (): Promise<SelectProfile | null> => {
-    const response = await fetch("/api/users/me");
-    if (response.status === 401) return null;
-    const json = await response.json();
-    if (!response.ok) throw new Error(json.error ?? "Failed to fetch user profile");
-    return json.data ?? null;
+    const response = await axiosInstance.get(API_ROUTES.USERS.ME);
+    return response.data;
   },
 };
 
-// 2. Query Options — queries/profile.query.ts
-export const getProfileQueryOptions = () =>
+// 2. Query Options — queries/user.query.ts
+export const getUserQueryOptions = () =>
   queryOptions({
-    queryKey: profileQueryKey.me(), // ["profile", "me"]
-    queryFn: () => profileService.me(),
+    queryKey: getQueryKey.users.me(), // ["users", "me"]
+    queryFn: () => usersService.me(),
   });
 
-// 3. Component — via UserProfileProvider or direct useQuery
-const { data: profile, isLoading } = useQuery(getProfileQueryOptions());
+// 3. Component — via useAuth() hook or direct useQuery
+const { profile, isLoading } = useAuth();
+// or directly: const { data: profile, isLoading } = useQuery(getUserQueryOptions());
 ```
 
 ## Error Handling
@@ -879,23 +876,25 @@ try {
 - Use descriptive human-readable error messages in responses
 - Auth-gate sensitive endpoints by checking `supabase.auth.getUser()` first
 
-### Service Layer: Graceful Degradation
+### Service Layer
 
 ```typescript
-// services/profile.service.ts pattern
-if (response.status === 401) return null; // Unauthenticated → null, don't throw
-
-const json = await response.json();
-if (!response.ok) {
-  const message = typeof json.error === "string" ? json.error : "Failed to fetch";
-  throw new Error(message); // TanStack Query catches this automatically
-}
-return json.data ?? null;
+// services/users.service.ts pattern
+export const usersService = {
+  me: async (): Promise<SelectProfile | null> => {
+    try {
+      const response = await axiosInstance.get<{ data: SelectProfile | null }>(API_ROUTES.USERS.ME);
+      return response.data.data ?? null;
+    } catch {
+      return null;
+    }
+  },
+};
 ```
 
-- 401 returns `null` gracefully (user simply not logged in)
-- Other errors `throw` — caught by TanStack Query's error handling
-- Consumed via `useQuery` which exposes `{ error, isLoading }` states
+- Services use the shared `axiosInstance` from `config/axios.config.ts`
+- Service wraps in try/catch and returns null on failure — isolates error handling from the query layer
+- Consumed via `useQuery` which exposes `{ data, error, isLoading }` states
 
 ### Form Validation Errors
 
@@ -919,30 +918,15 @@ return json.data ?? null;
 - React 19 `<Activity>` component shows/hides validation messages
 - `aria-invalid` attribute for accessibility
 
-### Missing: Error Boundaries
+### Error Boundaries
 
-This project currently has **no `error.tsx` files**. When adding error boundaries:
+Error boundaries (`error.tsx`) exist in all three route groups:
 
-```typescript
-// app/(protected)/error.tsx
-"use client";
+- `app/(auth)/error.tsx` — Card-based error boundary with "Back to login" link
+- `app/(protected)/error.tsx` — Inline error boundary with "Try again" button
+- `app/(public)/error.tsx` — Full-page error boundary with "Go home" link
 
-export default function Error({
-  error,
-  reset,
-}: {
-  error: Error & { digest?: string };
-  reset: () => void;
-}) {
-  return (
-    <div className="flex flex-col items-center justify-center min-h-screen gap-4">
-      <h2 className="text-2xl font-bold">Something went wrong!</h2>
-      <p className="text-muted-foreground">{error.message}</p>
-      <Button onClick={() => reset()}>Try again</Button>
-    </div>
-  );
-}
-```
+Each error boundary is a `"use client"` component that receives `{ error, reset }` props. The `reset()` function re-renders the route segment.
 
 ## Documentation (VitePress)
 
@@ -1012,7 +996,7 @@ import Image from "next/image";
 
 // 2. Third-party libraries
 import { useQuery } from "@tanstack/react-query";
-import { z } from "zod/v4";
+import { z } from "zod";
 import { useForm } from "react-hook-form";
 
 // 3. Internal utilities and lib
@@ -1138,7 +1122,7 @@ const { data: profile, isLoading } = useQuery(profileQueryOptions);
 ```typescript
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod/v4";
+import { z } from "zod";
 
 const schema = z.object({
   email: z.email(),
@@ -1173,7 +1157,7 @@ export const useExampleStore = create<ExampleStore>((set) => ({
 
 ### Shared Context (React Context)
 
-Used for cross-component data in route groups (e.g., `UserProfileProvider` in the protected layout).
+Used for cross-component data in route groups. Profile data is currently fetched via the `useAuth()` hook (`hooks/use-auth.ts`), not a dedicated context provider.
 
 ## Performance Best Practices
 
@@ -1278,5 +1262,5 @@ export default async function Page() {
 
 - Assumption: `dev` is the primary integration branch; adjust based on your team's workflow
 - Assumption: Manual release/deploy process is acceptable; add CI/CD automation as needed
-- Consideration: Signup flow may need `profiles` table seeding to work with `/api/users/me` endpoint
+- Consideration: Signup flow relies on a Supabase database trigger to auto-create a `profiles` row when a user is created
 - Consideration: Review branch protection rules to align with your team's release process

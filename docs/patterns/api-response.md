@@ -1,74 +1,55 @@
-# API Response & Error Handling
+# API Response
 
-Consistent, standardized API responses across all endpoints ensure predictable client-side handling and automatic error detection.
+Consistent, standardized API responses across all endpoints.
 
 ## The Problem
 
-Without standardization, different endpoints return different response shapes:
-
-```typescript
-// ❌ Inconsistent responses - clients never know the shape
-export async function GET() {
-  return NextResponse.json(data); // sometimes success, sometimes error
-}
-
-export async function POST() {
-  return NextResponse.json({ error: "...", success: false });
-}
-```
-
-**Solution:** Use the `apiResponse()` helper for every endpoint.
+Without standardization, endpoints return different response shapes and clients can't predict the format.
 
 ## How It Works
 
-The `apiResponse()` function:
+The `apiResponse()` helper in `lib/response.ts` provides:
 
-- ✅ Automatically detects success/error from HTTP status code
-- ✅ Returns consistent shape: `{ success, data, error }`
-- ✅ Includes automatic status text mapping
-- ✅ Fully type-safe with TypeScript inference
+- Automatic success/error detection from HTTP status code
+- Consistent response shape across all endpoints
+- Optional `message` field for additional context
+- Type-safe with TypeScript generics
 
 ```typescript
-// lib/api-response.ts
-export function apiResponse<T = unknown>({
-  data = null,
-  status,
-}: {
-  data: T | null;
+// lib/response.ts
+export function apiResponse<T>(prop: {
+  data?: T | null;
   status: number;
+  message?: string;
+  headers?: Record<string, string>;
 }): NextResponse {
+  const { data, status, message, headers } = prop;
   const success = status >= 200 && status < 300;
-  const error = getStatusText(status);
 
   return NextResponse.json(
     {
       success,
-      data,
-      error,
+      data: success ? (data ?? null) : null,
+      ...(message ? { message } : {}),
+      ...(success ? {} : { error: getStatusText(status) }),
     },
-    { status }
+    { status, headers }
   );
 }
 ```
 
 ## Response Format
 
-Every response follows this consistent structure:
-
-**Success Response (2xx):**
+**Success (2xx):**
 
 ```json
 {
   "success": true,
-  "data": {
-    "id": "123",
-    "email": "user@example.com"
-  },
-  "error": null
+  "data": { "id": "123", "email": "user@example.com" }
 }
 ```
 
-**Error Response (4xx/5xx):**
+**Error (4xx/5xx):**
 
 ```json
 {
@@ -78,20 +59,49 @@ Every response follows this consistent structure:
 }
 ```
 
-The `error` field automatically includes human-readable status text (e.g., "Bad Request", "Not Found").
+**Error with message:**
 
-## Usage Examples
+```json
+{
+  "success": false,
+  "data": null,
+  "error": "Bad Request",
+  "message": "Missing required fields"
+}
+```
 
-### Getting User Profile
+## Usage
+
+### Success Response
+
+```typescript
+import { apiResponse } from "@/lib/response";
+import { HttpStatus } from "@/constants/http-status.constant";
+
+return apiResponse({
+  data: profile,
+  status: HttpStatus.OK,
+});
+```
+
+### Error Response
+
+```typescript
+return apiResponse({
+  status: HttpStatus.BAD_REQUEST,
+  message: "Missing required fields",
+});
+```
+
+### Complete Endpoint
 
 ```typescript
 // app/api/users/me/route.ts
-import { apiResponse } from "@/lib/api-response";
-import { requireAuth } from "@/common/guards/auth.guard";
+import { apiResponse } from "@/lib/response";
+import { requireAuth } from "@/lib/guards/auth.guard";
 import { HttpStatus } from "@/constants/http-status.constant";
 
 export async function GET() {
-  // Auth guard returns error as NextResponse if unauthorized
   const { user, error } = await requireAuth();
   if (error) return error;
 
@@ -104,107 +114,24 @@ export async function GET() {
 }
 ```
 
-Response when authenticated:
-
-```json
-{
-  "success": true,
-  "data": {
-    "id": "user-123",
-    "email": "user@example.com",
-    "name": "John Doe"
-  },
-  "error": null
-}
-```
-
-### Sending Email
+### Client-Side Handling
 
 ```typescript
-// app/api/send/route.ts
-import { apiResponse } from "@/lib/api-response";
-import { requireAuth } from "@/common/guards/auth.guard";
-import { HttpStatus } from "@/constants/http-status.constant";
-
-export async function POST(request: NextRequest) {
-  const { user, error } = await requireAuth();
-  if (error) return error;
-
-  try {
-    const body = await request.json();
-
-    if (!body.email || !body.subject) {
-      return apiResponse({
-        data: "Missing email or subject",
-        status: HttpStatus.BAD_REQUEST,
-      });
-    }
-
-    const result = await resend.emails.send({
-      from: process.env.RESEND_EMAIL_FROM,
-      to: body.email,
-      subject: body.subject,
-      html: body.html,
-    });
-
-    return apiResponse({
-      data: result,
-      status: HttpStatus.OK,
-    });
-  } catch (error) {
-    console.error("Email send failed:", error);
-    return apiResponse({
-      data: "Failed to send email",
-      status: HttpStatus.INTERNAL_SERVER_ERROR,
-    });
-  }
-}
-```
-
-Response when validation fails:
-
-```json
-{
-  "success": false,
-  "data": "Missing email or subject",
-  "error": "Bad Request"
-}
-```
-
-## Client-Side Error Handling
-
-On the client, handle API responses with proper error messaging:
-
-```typescript
-// services/profile.service.ts
-export const profileService = {
+// services/users.service.ts
+export const usersService = {
   me: async (): Promise<SelectProfile | null> => {
-    const response = await fetch("/api/users/me");
-
-    if (response.status === 401) {
-      return null; // Graceful degradation for unauthenticated users
+    try {
+      const response = await axiosInstance.get<{ data: SelectProfile | null }>(API_ROUTES.USERS.ME);
+      return response.data.data ?? null;
+    } catch (error) {
+      console.error("Failed to fetch user profile:", error);
+      return null;
     }
-
-    const json = await response.json();
-
-    if (!response.ok) {
-      throw new Error(json.error ?? "Failed to fetch profile");
-    }
-
-    return json.data ?? null;
   },
 };
 ```
 
-## ✨ Benefits
+## Related
 
-- **Consistency** - All API routes follow the same response structure
-- **Simplicity** - Single function handles both success and error responses
-- **Type-Safe** - Generic typing supports any data structure
-- **Auto-Detection** - Success/error determined automatically from status code
-- **Flexibility** - Works with any HTTP status code and custom error messages
-
-## Related Patterns
-
-- [HTTP Status & Messages →](./http-status.md) - Status codes and error messages
-- [Auth Guard →](./auth-guard.md) - Authentication verification
+- [HTTP Status →](./http-status.md) — Status codes and text mapping
+- [Auth Guard →](./auth-guard.md) — Authentication verification

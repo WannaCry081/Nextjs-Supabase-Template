@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { toast } from "sonner";
-import { Activity, useTransition } from "react";
+import { useTransition } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -14,10 +14,9 @@ import { PasswordInput } from "@/components/shared/password-input";
 
 import { getSupabaseClient } from "@/lib/supabase/client";
 
-import { registerSchema, type RegisterFormValues } from "@/common/schemas/auth.schema";
+import { registerSchema, type RegisterFormValues } from "@/schemas/auth.schema";
 
 import { AUTH_ROUTES, DEFAULT_AUTH_REDIRECT } from "@/constants/routes.constant";
-import { AUTH_ERRORS, AUTH_SUCCESS, API_ERRORS } from "@/constants/http-error-messages.constant";
 
 export const PageClient = () => {
   const supabase = getSupabaseClient();
@@ -48,21 +47,21 @@ export const PageClient = () => {
         });
 
         if (error) {
-          toast.error(AUTH_ERRORS.REGISTER_FAILED, {
-            description: AUTH_ERRORS.REGISTER_FAILED_DESC,
+          toast.error("Registration failed", {
+            description: error.message,
           });
           return;
         }
 
-        toast.success(AUTH_SUCCESS.REGISTER_SUCCESS, {
-          description: AUTH_SUCCESS.REGISTER_SUCCESS_DESC,
+        toast.success("Check your email", {
+          description: "We've sent you a confirmation link.",
         });
 
         form.reset();
       } catch (error) {
         console.error(error);
-        toast.error(API_ERRORS.GENERIC, {
-          description: API_ERRORS.GENERIC_DESC,
+        toast.error("Something went wrong", {
+          description: "Please try again.",
         });
       }
     });
@@ -92,9 +91,7 @@ export const PageClient = () => {
                       aria-invalid={fieldState.invalid}
                       disabled={isPending}
                     />
-                    <Activity mode={fieldState.error ? "visible" : "hidden"}>
-                      <FieldError errors={[fieldState.error]} />
-                    </Activity>
+                    {fieldState.error ? <FieldError errors={[fieldState.error]} /> : null}
                   </Field>
                 )}
               />
@@ -112,9 +109,7 @@ export const PageClient = () => {
                       aria-invalid={fieldState.invalid}
                       disabled={isPending}
                     />
-                    <Activity mode={fieldState.error ? "visible" : "hidden"}>
-                      <FieldError errors={[fieldState.error]} />
-                    </Activity>
+                    {fieldState.error ? <FieldError errors={[fieldState.error]} /> : null}
                   </Field>
                 )}
               />
@@ -130,9 +125,7 @@ export const PageClient = () => {
                       disabled={isPending}
                       aria-invalid={fieldState.invalid}
                     />
-                    <Activity mode={fieldState.error ? "visible" : "hidden"}>
-                      <FieldError errors={[fieldState.error]} />
-                    </Activity>
+                    {fieldState.error ? <FieldError errors={[fieldState.error]} /> : null}
                   </Field>
                 )}
               />
