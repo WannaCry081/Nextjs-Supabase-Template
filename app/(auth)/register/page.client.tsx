@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -16,9 +17,10 @@ import { getSupabaseClient } from "@/lib/supabase/client";
 
 import { registerSchema, type RegisterFormValues } from "@/schemas/auth.schema";
 
-import { AUTH_ROUTES, DEFAULT_AUTH_REDIRECT } from "@/constants/routes.constant";
+import { AUTH_ROUTES } from "@/constants/routes.constant";
 
 export const PageClient = () => {
+  const router = useRouter();
   const supabase = getSupabaseClient();
 
   const [isPending, startTransition] = useTransition();
@@ -42,7 +44,6 @@ export const PageClient = () => {
             data: {
               name: values.name,
             },
-            emailRedirectTo: `${window.location.origin}${DEFAULT_AUTH_REDIRECT}`,
           },
         });
 
@@ -53,11 +54,12 @@ export const PageClient = () => {
           return;
         }
 
-        toast.success("Check your email", {
-          description: "We've sent you a confirmation link.",
+        toast.success("Registration successful", {
+          description: "You can now login with your credentials.",
         });
 
         form.reset();
+        router.push(AUTH_ROUTES.LOGIN);
       } catch (error) {
         console.error(error);
         toast.error("Something went wrong", {
