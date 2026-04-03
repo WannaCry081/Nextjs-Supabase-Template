@@ -98,13 +98,13 @@ pnpm start:all
 
 ### Database Setup
 
-The initial migration creates a `profiles` table. To set up your database:
+The initial migration (`drizzle/migrations/0000_InitialCreate.sql`) creates the `profiles` table and a Supabase trigger (`on_auth_user_created`) that auto-creates a profile row when a new user signs up. To set up your database:
 
 1. Connect your Supabase PostgreSQL URL in `.env`
-2. Run `pnpm db:push` to apply migrations
+2. Run `pnpm db:push` to apply the schema and trigger
 3. (Optional) Add seed data via SQL, Drizzle Studio, or a custom script
 
-Note: The `/api/users/me` endpoint expects a `profiles` record matching the Supabase user ID.
+Note: The `/api/users/me` endpoint expects a `profiles` record matching the Supabase user ID. The trigger handles this automatically for new signups.
 
 ## Run/Test/Lint/Build Commands
 
@@ -288,7 +288,8 @@ No deployment automation is currently configured. The CI validates code quality 
 ### “Why is profile data null in the dashboard/sidebar?”
 
 - `/api/users/me` looks up `profiles` row by Supabase user id (`app/api/users/me/route.ts`).
-- Ensure a matching `profiles` record exists.
+- The `on_auth_user_created` trigger (in `drizzle/migrations/0000_InitialCreate.sql`) auto-creates profiles on signup. If missing, re-run `pnpm db:push`.
+- For users created before the trigger existed, manually insert a `profiles` row matching the Supabase user ID.
 
 ### “Build fails with env errors or runtime crashes”
 

@@ -28,7 +28,7 @@ pnpm dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
-> **Note:** The dashboard sidebar fetches the user's profile from a `profiles` table. You'll need a Supabase database trigger to auto-create a `profiles` row when a new user signs up. See the [Getting Started guide](./docs/overview.md) for details.
+> **Note:** The initial migration includes a database trigger that auto-creates a `profiles` row when a new user signs up. This is applied automatically when you run `pnpm db:push`. See the [Getting Started guide](./docs/overview.md) for details.
 
 ## Environment
 
@@ -159,7 +159,3 @@ pnpm docs:dev     # Start VitePress at http://localhost:4000
 | tweakcn      | [tweakcn.com](https://tweakcn.com)             |
 | Tailwind CSS | [tailwindcss.com](https://tailwindcss.com)     |
 | Upstash      | [upstash.com](https://upstash.com)             |
-
-## License
-
-MIT
